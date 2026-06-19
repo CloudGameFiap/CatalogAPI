@@ -18,7 +18,7 @@ COPY ["src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj", "src/CloudGameCata
 COPY ["src/CloudGameCatalog.Application/CloudGameCatalog.Application.csproj", "src/CloudGameCatalog.Application/"]
 COPY ["src/CloudGameCatalog.Domain/CloudGameCatalog.Domain.csproj", "src/CloudGameCatalog.Domain/"]
 COPY ["src/CloudGameCatalog.Infrastructure/CloudGameCatalog.Infrastructure.csproj", "src/CloudGameCatalog.Infrastructure/"]
-RUN dotnet restore ".src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj"
+RUN dotnet restore "./src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj"
 COPY . .
 WORKDIR "/src/src/CloudGameCatalog.Api"
 RUN dotnet build "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
