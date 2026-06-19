@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="../CloudGameCatalog.Application/CloudGameCatalog.Application.csproj" />
-  <Project Path="../CloudGameCatalog.Domain/CloudGameCatalog.Domain.csproj" />
-  <Project Path="../CloudGameCatalog.Infrastructure/CloudGameCatalog.Infrastructure.csproj" />
-  <Project Path="CloudGameCatalog.Api.csproj" />
-</Solution>

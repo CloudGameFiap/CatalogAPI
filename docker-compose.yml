@@ -1,0 +1,37 @@
+services:
+  cloudgamecatalog.api:
+    image: ${DOCKER_REGISTRY-}cloudgamecatalogapi
+    build:
+      context: .
+      dockerfile: ./src/CloudGameCatalog.Api/Dockerfile
+    ports:
+      - '57398:8080'
+      - '57399:8081'
+    restart: unless-stopped
+    depends_on:
+     - sqlserver
+    networks:
+      - cloudgame-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    hostname: 'sqlserver'
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: "CloudGame#2026"
+    volumes:
+      - sql_data:/var/opt/mssql3
+    restart: unless-stopped
+    ports:
+      - '11433:1433'
+    expose:
+      - 1433
+    networks:
+      - cloudgame-network
+
+volumes:
+  sql_data:
+networks:
+  cloudgame-network:
+    driver: bridge  
+  

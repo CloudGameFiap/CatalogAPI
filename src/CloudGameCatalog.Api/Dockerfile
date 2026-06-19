@@ -1,11 +1,5 @@
 # Acesse https://aka.ms/customizecontainer para saber como personalizar seu contêiner de depuração e como o Visual Studio usa este Dockerfile para criar suas imagens para uma depuração mais rápida.
 
-# Esses ARGs permitem a troca da base usada para criar a imagem final durante a depuração do VS
-ARG LAUNCHING_FROM_VS
-# Isso define a imagem base definitiva, mas somente se LAUNCHING_FROM_VS tiver sido definido
-ARG FINAL_BASE_IMAGE=${LAUNCHING_FROM_VS:+aotdebug}
-
-# Esta fase é usada durante a execução no VS no modo rápido (Padrão para a configuração de Depuração)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
@@ -20,16 +14,19 @@ RUN apt-get update \
     clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["CloudGameCatalog.csproj", "."]
-RUN dotnet restore "./CloudGameCatalog.csproj"
+COPY ["src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj", "src/CloudGameCatalog.Api/"]
+COPY ["src/CloudGameCatalog.Application/CloudGameCatalog.Application.csproj", "src/CloudGameCatalog.Application/"]
+COPY ["src/CloudGameCatalog.Domain/CloudGameCatalog.Domain.csproj", "src/CloudGameCatalog.Domain/"]
+COPY ["src/CloudGameCatalog.Infrastructure/CloudGameCatalog.Infrastructure.csproj", "src/CloudGameCatalog.Infrastructure/"]
+RUN dotnet restore ".src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./CloudGameCatalog.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/src/CloudGameCatalog.Api"
+RUN dotnet build "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CloudGameCatalog.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
+RUN dotnet publish "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
 
 # Esta fase é usada como base para a fase final ao iniciar no VS para dar suporte à depuração no modo normal (Padrão ao não usar a configuração de Depuração)
 FROM base AS aotdebug
@@ -45,4 +42,4 @@ FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:10.0} AS final
 WORKDIR /app
 EXPOSE 8080
 COPY --from=publish /app/publish .
-ENTRYPOINT ["./CloudGameCatalog"]
+ENTRYPOINT ["dotnet","CloudGameCatalog.Api.dll"]

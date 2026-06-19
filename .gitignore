@@ -14,3 +14,8 @@
 /src/CloudGameCatalog.Infrastructure/obj
 /src/.vs
 /src/CloudGameCatalog/CloudGameCatalog.Api.csproj.user
+/src/CloudGameCatalog.Api/bin/Debug/net10.0
+/src/CloudGameCatalog.Api/obj
+/src/CloudGameCatalog.Api/.vs
+/obj/Docker
+/.vs
