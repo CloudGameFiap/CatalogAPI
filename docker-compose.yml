@@ -9,7 +9,8 @@ services:
       - '57399:8081'
     restart: unless-stopped
     depends_on:
-     - sqlserver
+      sqlserver:
+        condition: service_healthy
     networks:
       - cloudgame-network
 
@@ -20,12 +21,18 @@ services:
       ACCEPT_EULA: 'Y'
       MSSQL_SA_PASSWORD: "CloudGame#2026"
     volumes:
-      - sql_data:/var/opt/mssql3
+      - sql_data:/var/opt/mssql
     restart: unless-stopped
     ports:
       - '11433:1433'
     expose:
       - 1433
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - cloudgame-network
 

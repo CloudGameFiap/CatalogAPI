@@ -2,7 +2,7 @@
 
 namespace CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 
-public readonly record struct GetGameByIdResponse(int Id,
+public readonly record struct GetGameByIdQueryResponse(int Id,
 string Name,
 string Description,
 string? ImageUrl,

@@ -8,10 +8,6 @@ EXPOSE 8080
 
 # Esta fase é usada para compilar o projeto de serviço
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-# Instalar dependências clang/zlib1g-dev para publicação no nativo
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj", "src/CloudGameCatalog.Api/"]
@@ -26,20 +22,10 @@ RUN dotnet build "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
-
-# Esta fase é usada como base para a fase final ao iniciar no VS para dar suporte à depuração no modo normal (Padrão ao não usar a configuração de Depuração)
-FROM base AS aotdebug
-USER root
-# Instalar o GDB para dar suporte à depuração nativa
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    gdb
-USER app
+RUN dotnet publish "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
-FROM ${FINAL_BASE_IMAGE:-mcr.microsoft.com/dotnet/runtime-deps:10.0} AS final
+FROM base AS final
 WORKDIR /app
-EXPOSE 8080
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet","CloudGameCatalog.Api.dll"]

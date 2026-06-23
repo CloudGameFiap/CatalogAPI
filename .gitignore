@@ -19,3 +19,5 @@
 /src/CloudGameCatalog.Api/.vs
 /obj/Docker
 /.vs
+/bin/Debug
+/obj/Debug

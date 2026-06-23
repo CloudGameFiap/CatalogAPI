@@ -15,7 +15,7 @@ public static class ApplicationExtensions
         services.AddScoped<IHandler<CreateGameCommand, CreateGameCommandResponse>, CreateGameCommandHandler>();
         services.AddScoped<IHandler<UpdateGameCommand, UpdateGameCommandResponse>, UpdateGameCommandHandler>();              
 
-        services.AddScoped<IHandler<GetGameByIdQuery, GetGameByIdResponse>, GetGameByIdQueryHandler>();
+        services.AddScoped<IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>, GetGameByIdQueryHandler>();
         services.AddScoped<IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>>, FindGamesQueryHandler>();
 
         return services;
