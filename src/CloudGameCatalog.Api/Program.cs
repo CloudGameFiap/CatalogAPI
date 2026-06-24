@@ -5,21 +5,28 @@ using CloudGameCatalog.Application.Handlers.GameHandler.Update;
 using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
+using CloudGameCatalog.Domain.Parameters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
+using CloudGameCatalog.Application.Extensions;
+using CloudGameCatalog.Infrastructure.Extensions;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-});
+//builder.Services.ConfigureHttpJsonOptions(options =>
+//{
+//    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+//});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+//builder.Services.AddOpenApi();
+
+builder.Services.AddApplicationHandlers()
+    .AddInfrastructureServices(builder.Configuration);
 
 var jwtSettingsSection = builder.Configuration.GetRequiredSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSettingsSection);
@@ -54,28 +61,28 @@ if (app.Environment.IsDevelopment())
 
 var gamesApi = app.MapGroup("/games");
 
-gamesApi.MapGet("/", () => FindGamesAsync)
+gamesApi.MapGet("/", FindGamesAsync)
         .WithName("FindGames");
 
-gamesApi.MapGet("/{id}", GetGameByIdAsync)
-    .WithName("GetGameById");
+//gamesApi.MapGet("/{id}", GetGameByIdAsync)
+//    .WithName("GetGameById");
 
-gamesApi.MapPost("/", CreateGameAsync)
-    .WithName("CreateGame");
+//gamesApi.MapPost("/", CreateGameAsync)
+//    .WithName("CreateGame");
 
-gamesApi.MapPut("/", UpdateGameAsync)
-    .WithName("UpdateGame");
+//gamesApi.MapPut("/", UpdateGameAsync)
+//    .WithName("UpdateGame");
 
-static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync(FindGamesQuery request, IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
+static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([FromQuery] string? name, [FromQuery] bool? active,[FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
     CancellationToken ct)
 {
-    var result = await handler.HandleAsync(request, ct);
+    var result = await handler.HandleAsync(new FindGamesQuery(new FindGamesParameter() { Name= name ,Active= active }), ct);
 
     return result.IsSuccess ? TypedResults.Ok(result)
         : TypedResults.NotFound();
 }
 
-static async Task<Results<Ok<Result<GetGameByIdQueryResponse>>, NotFound<Result<GetGameByIdQueryResponse>>>> GetGameByIdAsync(int id, IHandler<GetGameByIdQuery, GetGameByIdQueryResponse> handler,
+static async Task<Results<Ok<Result<GetGameByIdQueryResponse>>, NotFound<Result<GetGameByIdQueryResponse>>>> GetGameByIdAsync([FromRoute] int id, [FromServices] IHandler<GetGameByIdQuery, GetGameByIdQueryResponse> handler,
     CancellationToken ct)
 {
     var result = await handler.HandleAsync(new GetGameByIdQuery() { Id = id }, ct);
@@ -84,7 +91,7 @@ static async Task<Results<Ok<Result<GetGameByIdQueryResponse>>, NotFound<Result<
         : TypedResults.NotFound(result);
 }
 
-static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Result<CreateGameCommandResponse>>>> CreateGameAsync(CreateGameCommand command, IHandler<CreateGameCommand, CreateGameCommandResponse> handler,
+static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Result<CreateGameCommandResponse>>>> CreateGameAsync([FromBody] CreateGameCommand command, [FromServices] IHandler<CreateGameCommand, CreateGameCommandResponse> handler,
     CancellationToken ct)
 {
     var result = await handler.HandleAsync(command, ct);
@@ -93,7 +100,7 @@ static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Resu
         : TypedResults.BadRequest(result);
 }
 
-static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync(UpdateGameCommand command, IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
+static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync([FromBody] UpdateGameCommand command, [FromServices] IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
     CancellationToken ct)
 {    
     var result = await handler.HandleAsync(command, ct);
@@ -104,14 +111,17 @@ static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Resu
 
 app.Run();
 
-[JsonSerializable(typeof(GetGameByIdQueryResponse[]))]
-[JsonSerializable(typeof(CreateGameCommand))]
-[JsonSerializable(typeof(UpdateGameCommand))]
-[JsonSerializable(typeof(CreateGameCommandResponse))]
-[JsonSerializable(typeof(UpdateGameCommandResponse))]
-[JsonSerializable(typeof(CreateGameCommandResponse[]))]
-[JsonSerializable(typeof(UpdateGameCommandResponse[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
+//[JsonSerializable(typeof(Result<Pagination<FindGamesQueryResponse>>))]
+//[JsonSerializable(typeof(Pagination<FindGamesQueryResponse>))]
+//[JsonSerializable(typeof(FindGamesQueryResponse))]
+//[JsonSerializable(typeof(GetGameByIdQueryResponse[]))]
+//[JsonSerializable(typeof(CreateGameCommand))]
+//[JsonSerializable(typeof(UpdateGameCommand))]
+//[JsonSerializable(typeof(CreateGameCommandResponse))]
+//[JsonSerializable(typeof(UpdateGameCommandResponse))]
+//[JsonSerializable(typeof(CreateGameCommandResponse[]))]
+//[JsonSerializable(typeof(UpdateGameCommandResponse[]))]
+//internal partial class AppJsonSerializerContext : JsonSerializerContext
+//{
 
-}
+//}
