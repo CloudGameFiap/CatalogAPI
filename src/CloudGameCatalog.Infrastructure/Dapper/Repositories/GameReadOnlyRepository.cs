@@ -22,8 +22,8 @@ public sealed class GameReadOnlyRepository(IDapperContext context)
         if (!string.IsNullOrWhiteSpace(parameters.Name))
             sqlBuilder.Where("Name LIKE @name", new { name = $"%{parameters.Name}%" });
 
-        var countQuery = sqlBuilder.AddTemplate("Select count(*) from Game /**where**/");
-        var queryGames = sqlBuilder.AddTemplate(@"select Id, Name, Active from Game
+        var countQuery = sqlBuilder.AddTemplate("Select count(*) from Games /**where**/");
+        var queryGames = sqlBuilder.AddTemplate(@"select Id, Name, Active from Games
                                                 /**where**/ ORDER BY Id OFFSET @skip ROWS FETCH NEXT @size ROWS ONLY",
                                                 new { skip = parameters.Skip, size = parameters.PageSize });
 

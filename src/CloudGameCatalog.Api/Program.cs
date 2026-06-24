@@ -1,3 +1,4 @@
+using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
@@ -6,14 +7,15 @@ using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
+using CloudGameCatalog.Infrastructure.EntityFramework;
+using CloudGameCatalog.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.Text;
-using System.Text.Json.Serialization;
-using CloudGameCatalog.Application.Extensions;
-using CloudGameCatalog.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 //});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
+builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationHandlers()
     .AddInfrastructureServices(builder.Configuration);
@@ -54,9 +56,10 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+await using (var scope = app.Services.CreateAsyncScope())
+await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
 {
-    app.MapOpenApi();
+    await appDbContext.Database.EnsureCreatedAsync();
 }
 
 var gamesApi = app.MapGroup("/games");
@@ -64,19 +67,19 @@ var gamesApi = app.MapGroup("/games");
 gamesApi.MapGet("/", FindGamesAsync)
         .WithName("FindGames");
 
-//gamesApi.MapGet("/{id}", GetGameByIdAsync)
-//    .WithName("GetGameById");
+gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
+    .WithName("GetGameById");
 
-//gamesApi.MapPost("/", CreateGameAsync)
-//    .WithName("CreateGame");
+gamesApi.MapPost("/", CreateGameAsync)
+    .WithName("CreateGame");
 
-//gamesApi.MapPut("/", UpdateGameAsync)
-//    .WithName("UpdateGame");
+gamesApi.MapPut("/", UpdateGameAsync)
+    .WithName("UpdateGame");
 
-static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([FromQuery] string? name, [FromQuery] bool? active,[FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
+static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
     CancellationToken ct)
 {
-    var result = await handler.HandleAsync(new FindGamesQuery(new FindGamesParameter() { Name= name ,Active= active }), ct);
+    var result = await handler.HandleAsync(new FindGamesQuery(parameters), ct);
 
     return result.IsSuccess ? TypedResults.Ok(result)
         : TypedResults.NotFound();
@@ -102,11 +105,23 @@ static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Resu
 
 static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync([FromBody] UpdateGameCommand command, [FromServices] IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
     CancellationToken ct)
-{    
+{
     var result = await handler.HandleAsync(command, ct);
 
     return result.IsSuccess ? TypedResults.Ok(result)
         : TypedResults.BadRequest(result);
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();             
+    app.MapScalarApiReference(options =>
+    {
+        options.AddDocument("v1", "v1", "/openapi/v1.json")
+            .WithTitle("CloudGameCatalog")
+            .WithTheme(ScalarTheme.Mars)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
 }
 
 app.Run();
