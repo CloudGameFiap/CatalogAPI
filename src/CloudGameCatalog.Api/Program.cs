@@ -1,3 +1,4 @@
+using CloudGameCatalog.Api.Extensions;
 using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
@@ -9,15 +10,18 @@ using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateGameCommandValidator>();
 
 //builder.Services.ConfigureHttpJsonOptions(options =>
 //{
@@ -71,10 +75,12 @@ gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
     .WithName("GetGameById");
 
 gamesApi.MapPost("/", CreateGameAsync)
-    .WithName("CreateGame");
+    .WithName("CreateGame")
+    .WithValidation<CreateGameCommand>();
 
 gamesApi.MapPut("/", UpdateGameAsync)
-    .WithName("UpdateGame");
+    .WithName("UpdateGame")
+    .WithValidation<UpdateGameCommand>();
 
 static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
     CancellationToken ct)
