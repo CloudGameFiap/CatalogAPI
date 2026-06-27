@@ -12,17 +12,11 @@ using CloudGameCatalog.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-//builder.Services.ConfigureHttpJsonOptions(options =>
-//{
-//    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-//});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -36,23 +30,23 @@ builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 var encriptKey = jwtSettingsSection.GetValue<string>("EncriptKey")!;
 var key = Encoding.ASCII.GetBytes(encriptKey);
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-            .AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(x =>
+    {
+        x.RequireHttpsMetadata = false;
+        x.SaveToken = true;
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 
 var app = builder.Build();
 
@@ -114,7 +108,7 @@ static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Resu
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();             
+    app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
         options.AddDocument("v1", "v1", "/openapi/v1.json")
@@ -124,19 +118,4 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.Run();
-
-//[JsonSerializable(typeof(Result<Pagination<FindGamesQueryResponse>>))]
-//[JsonSerializable(typeof(Pagination<FindGamesQueryResponse>))]
-//[JsonSerializable(typeof(FindGamesQueryResponse))]
-//[JsonSerializable(typeof(GetGameByIdQueryResponse[]))]
-//[JsonSerializable(typeof(CreateGameCommand))]
-//[JsonSerializable(typeof(UpdateGameCommand))]
-//[JsonSerializable(typeof(CreateGameCommandResponse))]
-//[JsonSerializable(typeof(UpdateGameCommandResponse))]
-//[JsonSerializable(typeof(CreateGameCommandResponse[]))]
-//[JsonSerializable(typeof(UpdateGameCommandResponse[]))]
-//internal partial class AppJsonSerializerContext : JsonSerializerContext
-//{
-
-//}
+await app.RunAsync();
