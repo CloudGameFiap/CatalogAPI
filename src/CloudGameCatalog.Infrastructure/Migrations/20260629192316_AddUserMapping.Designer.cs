@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudGameCatalog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260629183347_AddUserMapping")]
+    [Migration("20260629192316_AddUserMapping")]
     partial class AddUserMapping
     {
         /// <inheritdoc />
@@ -69,10 +69,7 @@ namespace CloudGameCatalog.Infrastructure.Migrations
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("BIT");
