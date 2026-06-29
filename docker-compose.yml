@@ -11,6 +11,22 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - cloudgame-network
+
+  cloudgamecatalog.consumer:
+    image: ${DOCKER_REGISTRY-}cloudgamecatalogconsumer
+    build:
+      context: .
+      dockerfile: ./src/CloudGameCatalog.Consumer/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - cloudgame-network
 
@@ -57,5 +73,4 @@ volumes:
   rabbitmq_data:
 networks:
   cloudgame-network:
-    driver: bridge  
-  
+    driver: bridge
