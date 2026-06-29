@@ -9,6 +9,7 @@ using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,23 @@ await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbCo
 {
     await appDbContext.Database.EnsureCreatedAsync();
 }
+
+builder.Services.AddMassTransit(bus =>
+{
+    bus.UsingRabbitMq((ctx, cfg) =>
+    {
+        var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+        var host = rabbitMqSection["Host"]!;
+        var username = rabbitMqSection["Username"]!;
+        var password = rabbitMqSection["Password"]!;
+
+        cfg.Host(host, "/", h =>
+        {
+            h.Username(username);
+            h.Password(password);
+        });
+    });
+});
 
 var gamesApi = app.MapGroup("/games");
 

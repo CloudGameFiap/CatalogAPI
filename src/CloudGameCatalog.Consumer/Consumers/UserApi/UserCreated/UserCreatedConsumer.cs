@@ -1,11 +1,11 @@
-﻿using CloudGameCatalog.Domain.Entities;
+﻿using CloudGame.Domain.Events.User;
+using CloudGameCatalog.Domain.Entities;
 using CloudGameCatalog.Domain.Interfaces;
 using MassTransit;
 
 namespace CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 
 internal class UserCreatedConsumer(
-    ILogger<UserCreatedConsumer> logger,
     IUserWriteOnlyRepository userWriteOnlyRepository,
     IUserReadOnlyRepository userReadOnlyRepository,
     IUnitOfWork unitOfWork)
@@ -34,7 +34,5 @@ internal class UserCreatedConsumer(
         await userWriteOnlyRepository.AddAsync(user);
 
         await unitOfWork.SaveChangesAsync();
-
-        logger.LogInformation("User created: {UserId} - {UserName}", user.Id, user.Name);
     }
 }

@@ -10,28 +10,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data;
 
-namespace CloudGameCatalog.Infrastructure.Extensions
+namespace CloudGameCatalog.Infrastructure.Extensions;
+
+public static class InfrastructureExtensions
 {
-    public static class InfrastructureExtensions
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer
-                (
-                    configuration.GetConnectionString("Default")
-                )
-            );
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer
+            (
+                configuration.GetConnectionString("Default")
+            )
+        );
 
-            services.AddScoped<IDbConnection>(sp => new SqlConnection(configuration.GetConnectionString("Default")));
-            services.AddScoped<IDapperContext>(sp => new DapperContext(configuration));
-            services.AddScoped<IGameWriteOnlyRepository, GameWriteOnlyRepository>();
-            services.AddScoped<IGameReadOnlyRepository, GameReadOnlyRepository>();
-            services.AddScoped<IUserReadOnlyRepository, UserReadOnlyRepository>();
-            services.AddScoped<IUserWriteOnlyRepository, UserWriteOnlyRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
+        services.AddScoped<IDbConnection>(sp => new SqlConnection(configuration.GetConnectionString("Default")));
+        services.AddScoped<IDapperContext>(sp => new DapperContext(configuration));
+        services.AddScoped<IGameWriteOnlyRepository, GameWriteOnlyRepository>();
+        services.AddScoped<IGameReadOnlyRepository, GameReadOnlyRepository>();
+        services.AddScoped<IUserReadOnlyRepository, UserReadOnlyRepository>();
+        services.AddScoped<IUserWriteOnlyRepository, UserWriteOnlyRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
 
-            return services;
-        }
+        return services;
     }
 }

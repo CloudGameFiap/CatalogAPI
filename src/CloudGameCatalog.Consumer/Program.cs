@@ -1,18 +1,13 @@
-using CloudGameCatalog.Consumer;
+using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 using CloudGameCatalog.Infrastructure.EntityFramework;
+using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
 
-var app = builder.Build();
-
-await using (var scope = app.Services.CreateAsyncScope())
-await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-{
-    await appDbContext.Database.EnsureCreatedAsync();
-}
+builder.Services.AddApplicationHandlers()
+    .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddMassTransit(bus =>
 {
@@ -37,5 +32,13 @@ builder.Services.AddMassTransit(bus =>
         });
     });
 });
+
+var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
+{
+    await appDbContext.Database.EnsureCreatedAsync();
+}
 
 await app.RunAsync();
