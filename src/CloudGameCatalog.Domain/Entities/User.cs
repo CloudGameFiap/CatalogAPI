@@ -11,17 +11,29 @@ public sealed class User : Entity<int>
         IsAdmin = isAdmin;
     }
 
-    public string Name { get; private set; }
+    public string Name { get; protected set; }
 
-    public string Email { get; private set; }
+    public string Email { get; protected set; }
 
-    public DateTime BirthDate { get; private set; }
+    public DateTime BirthDate { get; protected set; }
 
-    public bool Active { get; private set; }
+    public bool Active { get; protected set; }
 
-    public DateTime? UpdateAt { get; private set; }
+    public DateTime? UpdateAt { get; protected set; }
 
-    public bool IsAdmin { get; private set; }
+    public bool IsAdmin { get; protected set; }
+
+    public static User Create(int Id, string Name, string Email, DateTime BirthDate, bool Active, DateTime CreatedAt, bool IsAdmin)
+    {
+        User user = new(Name, Email, BirthDate, IsAdmin)
+        {
+            Id = Id,
+            Active = Active,
+            CreatedAt = CreatedAt
+        };
+
+        return user;
+    }
 
     private User() { }
 }

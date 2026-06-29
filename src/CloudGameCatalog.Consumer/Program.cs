@@ -38,5 +38,4 @@ builder.Services.AddMassTransit(bus =>
     });
 });
 
-
 await app.RunAsync();
