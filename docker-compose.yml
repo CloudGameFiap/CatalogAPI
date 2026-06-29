@@ -36,8 +36,25 @@ services:
     networks:
       - cloudgame-network
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: 'rabbitmq'
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cloudgame-network
+
 volumes:
   sql_data:
+  rabbitmq_data:
 networks:
   cloudgame-network:
     driver: bridge  

@@ -10,11 +10,11 @@ namespace CloudGameCatalog.Infrastructure.Dapper.Repositories;
 
 public sealed class GameReadOnlyRepository(IDapperContext context)
     : AbstractRepository<Game, int>(context), IGameReadOnlyRepository
-{    
+{
 
     public async Task<Pagination<Game>> FindAsync(FindGamesParameter parameters)
     {
-        var sqlBuilder = new SqlBuilder();        
+        var sqlBuilder = new SqlBuilder();
 
         if (parameters.Active.HasValue)
             sqlBuilder.Where("Active=@active", new { active = parameters.Active });
@@ -33,5 +33,5 @@ public sealed class GameReadOnlyRepository(IDapperContext context)
         var games = (await connection.QueryAsync<Game>(queryGames.RawSql, queryGames.Parameters)).ToList();
 
         return new Pagination<Game>(games, count);
-    }    
+    }
 }
