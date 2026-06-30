@@ -27,6 +27,7 @@ namespace CloudGameCatalog.Infrastructure.Extensions
             services.AddScoped<IDapperContext>(sp => new DapperContext(configuration));
             services.AddScoped<IGameWriteOnlyRepository, GameWriteOnlyRepository>();
             services.AddScoped<IGameReadOnlyRepository, GameReadOnlyRepository>();
+            services.AddScoped<IUserReadOnlyRepository, UserReadOnlyRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
 
             return services;
