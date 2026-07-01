@@ -3,6 +3,6 @@ using CloudGameCatalog.Domain.Interfaces;
 
 namespace CloudGameCatalog.Infrastructure.EntityFramework.Repositories;
 
-public sealed class GameWriteOnlyRepository(AppDbContext dbContext) : AbstractRepository<Game, int>(dbContext), IGameWriteOnlyRepository
+public sealed class UserWriteOnlyRepository(AppDbContext dbContext) : AbstractRepository<User, int>(dbContext), IUserWriteOnlyRepository
 {
 }

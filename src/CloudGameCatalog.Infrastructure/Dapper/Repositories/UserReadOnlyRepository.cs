@@ -12,6 +12,6 @@ public sealed class UserReadOnlyRepository(IDapperContext context)
     public override async Task<User> GetByIdAsync(int id)
     {
         using IDbConnection connection = Context.OpenConnection();
-        return await connection.QueryFirstOrDefaultAsync<User>("SELECT Id,Name,Email,Active,Password,IsAdmin,BirthDate,CreatedAt,UpdateAt FROM Users WHERE Id = @id", new { id });
+        return await connection.QueryFirstOrDefaultAsync<User>("SELECT Id,Name,Email,Active,IsAdmin,BirthDate,CreatedAt,UpdateAt FROM Users WHERE Id = @id", new { id });
     }
 }

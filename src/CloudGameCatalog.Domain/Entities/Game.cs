@@ -9,7 +9,7 @@ public sealed class Game : Entity<int>
     public string Genre { get; private set; }
     public DateTime ReleaseDate { get; private set; }
 
-    public bool Active { get; private set; }   
+    public bool Active { get; private set; }
 
     public Game(string name, string description, string? imageUrl, decimal price, string genre, DateTime releaseDate)
     {
@@ -18,7 +18,7 @@ public sealed class Game : Entity<int>
         ImageUrl = imageUrl;
         Price = price;
         Genre = genre;
-        ReleaseDate = releaseDate;       
+        ReleaseDate = releaseDate;
         Active = true;
         Validate();
     }
@@ -30,7 +30,7 @@ public sealed class Game : Entity<int>
         ImageUrl = imageUrl;
         Price = price;
         Genre = genre;
-        ReleaseDate = releaseDate;        
+        ReleaseDate = releaseDate;
         Validate();
     }
 
@@ -49,7 +49,7 @@ public sealed class Game : Entity<int>
             throw new ArgumentException("Game genre cannot be empty or null.");
 
         if (Price < 0)
-            throw new ArgumentException("Game price cannot be negative or empty.");        
+            throw new ArgumentException("Game price cannot be negative or empty.");
     }
 
     private Game() { }

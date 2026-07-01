@@ -11,9 +11,9 @@ namespace CloudGameCatalog.Application.Extensions;
 public static class ApplicationExtensions
 {
     public static IServiceCollection AddApplicationHandlers(this IServiceCollection services)
-    {        
+    {
         services.AddScoped<IHandler<CreateGameCommand, CreateGameCommandResponse>, CreateGameCommandHandler>();
-        services.AddScoped<IHandler<UpdateGameCommand, UpdateGameCommandResponse>, UpdateGameCommandHandler>();              
+        services.AddScoped<IHandler<UpdateGameCommand, UpdateGameCommandResponse>, UpdateGameCommandHandler>();
 
         services.AddScoped<IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>, GetGameByIdQueryHandler>();
         services.AddScoped<IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>>, FindGamesQueryHandler>();

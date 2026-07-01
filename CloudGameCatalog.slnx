@@ -1,6 +1,7 @@
 <Solution>
 	<Folder Name="/src/">
 		<Project Path="src/CloudGameCatalog.Application/CloudGameCatalog.Application.csproj" />
+		<Project Path="src/CloudGameCatalog.Consumer/CloudGameCatalog.Consumer.csproj" Id="97b84def-b279-47e5-a1d5-44059db07c05" />
 		<Project Path="src/CloudGameCatalog.Domain/CloudGameCatalog.Domain.csproj" />
 		<Project Path="src/CloudGameCatalog.Infrastructure/CloudGameCatalog.Infrastructure.csproj" />
 		<Project Path="src/CloudGameCatalog.Api/CloudGameCatalog.Api.csproj" />
