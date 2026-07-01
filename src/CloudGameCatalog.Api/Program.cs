@@ -15,125 +15,143 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+try
+{
+    Log.Information("Starting up the application...");
 
-builder.Services.AddApplicationHandlers()
-    .AddInfrastructureServices(builder.Configuration);
+    var builder = WebApplication.CreateBuilder(args);
 
-var jwtSettingsSection = builder.Configuration.GetRequiredSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSettingsSection);
-
-var encriptKey = jwtSettingsSection.GetValue<string>("EncriptKey")!;
-var key = Encoding.ASCII.GetBytes(encriptKey);
-builder.Services.AddAuthentication(options =>
+    builder.Host.UseSerilog((hostingContext, configuration) =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(x =>
-    {
-        x.RequireHttpsMetadata = false;
-        x.SaveToken = true;
-        x.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
+        configuration
+            .ReadFrom.Configuration(hostingContext.Configuration);
     });
 
-var app = builder.Build();
+    // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+    builder.Services.AddOpenApi();
 
-await using (var scope = app.Services.CreateAsyncScope())
-await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-{
-    await appDbContext.Database.EnsureCreatedAsync();
-}
+    builder.Services.AddApplicationHandlers()
+        .AddInfrastructureServices(builder.Configuration);
 
-builder.Services.AddMassTransit(bus =>
-{
-    bus.UsingRabbitMq((ctx, cfg) =>
-    {
-        var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
-        var host = rabbitMqSection["Host"]!;
-        var username = rabbitMqSection["Username"]!;
-        var password = rabbitMqSection["Password"]!;
+    var jwtSettingsSection = builder.Configuration.GetRequiredSection("JwtSettings");
+    builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 
-        cfg.Host(host, "/", h =>
+    var encriptKey = jwtSettingsSection.GetValue<string>("EncriptKey")!;
+    var key = Encoding.ASCII.GetBytes(encriptKey);
+    builder.Services.AddAuthentication(options =>
         {
-            h.Username(username);
-            h.Password(password);
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(x =>
+        {
+            x.RequireHttpsMetadata = false;
+            x.SaveToken = true;
+            x.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false
+            };
         });
-    });
-});
 
-var gamesApi = app.MapGroup("/games");
+    var app = builder.Build();
 
-gamesApi.MapGet("/", FindGamesAsync)
-        .WithName("FindGames");
+    app.UseSerilogRequestLogging();
 
-gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
-    .WithName("GetGameById");
+    Log.Information("The application has been built, and star the pipeline setup has started.");
 
-gamesApi.MapPost("/", CreateGameAsync)
-    .WithName("CreateGame");
-
-gamesApi.MapPut("/", UpdateGameAsync)
-    .WithName("UpdateGame");
-
-static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
-    CancellationToken ct)
-{
-    var result = await handler.HandleAsync(new FindGamesQuery(parameters), ct);
-
-    return result.IsSuccess ? TypedResults.Ok(result)
-        : TypedResults.NotFound();
-}
-
-static async Task<Results<Ok<Result<GetGameByIdQueryResponse>>, NotFound<Result<GetGameByIdQueryResponse>>>> GetGameByIdAsync([FromRoute] int id, [FromServices] IHandler<GetGameByIdQuery, GetGameByIdQueryResponse> handler,
-    CancellationToken ct)
-{
-    var result = await handler.HandleAsync(new GetGameByIdQuery() { Id = id }, ct);
-
-    return result.IsSuccess ? TypedResults.Ok(result)
-        : TypedResults.NotFound(result);
-}
-
-static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Result<CreateGameCommandResponse>>>> CreateGameAsync([FromBody] CreateGameCommand command, [FromServices] IHandler<CreateGameCommand, CreateGameCommandResponse> handler,
-    CancellationToken ct)
-{
-    var result = await handler.HandleAsync(command, ct);
-
-    return result.IsSuccess ? TypedResults.Ok(result)
-        : TypedResults.BadRequest(result);
-}
-
-static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync([FromBody] UpdateGameCommand command, [FromServices] IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
-    CancellationToken ct)
-{
-    var result = await handler.HandleAsync(command, ct);
-
-    return result.IsSuccess ? TypedResults.Ok(result)
-        : TypedResults.BadRequest(result);
-}
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
+    await using (var scope = app.Services.CreateAsyncScope())
+    await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
     {
-        options.AddDocument("v1", "v1", "/openapi/v1.json")
-            .WithTitle("CloudGameCatalog")
-            .WithTheme(ScalarTheme.Mars)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
-}
+        await appDbContext.Database.EnsureCreatedAsync();
+    }
 
-await app.RunAsync();
+    var gamesApi = app.MapGroup("/games");
+
+    gamesApi.MapGet("/", FindGamesAsync)
+            .WithName("FindGames");
+
+    gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
+        .WithName("GetGameById");
+
+    gamesApi.MapPost("/", CreateGameAsync)
+        .WithName("CreateGame");
+
+    gamesApi.MapPut("/", UpdateGameAsync)
+        .WithName("UpdateGame");
+
+    static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleAsync(new FindGamesQuery(parameters), ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.NotFound();
+    }
+
+    static async Task<Results<Ok<Result<GetGameByIdQueryResponse>>, NotFound<Result<GetGameByIdQueryResponse>>>> GetGameByIdAsync([FromRoute] int id, [FromServices] IHandler<GetGameByIdQuery, GetGameByIdQueryResponse> handler,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleAsync(new GetGameByIdQuery() { Id = id }, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.NotFound(result);
+    }
+
+    static async Task<Results<Ok<Result<CreateGameCommandResponse>>, BadRequest<Result<CreateGameCommandResponse>>>> CreateGameAsync([FromBody] CreateGameCommand command, [FromServices] IHandler<CreateGameCommand, CreateGameCommandResponse> handler,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
+    static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync([FromBody] UpdateGameCommand command, [FromServices] IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference(options =>
+        {
+            options.AddDocument("v1", "v1", "/openapi/v1.json")
+                .WithTitle("CloudGameCatalog")
+                .WithTheme(ScalarTheme.Mars)
+                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+        });
+    }
+
+    Log.Information("Pipeline successfully configured and application initialized...");
+
+    await app.RunAsync();
+}
+catch (Exception ex) when (ex.GetType().Name != "HostAbortedException")
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+catch (Exception)
+{
+    throw;
+}
+finally
+{
+    Log.Information("Shutting down the application...");
+    Log.CloseAndFlush();
+}
