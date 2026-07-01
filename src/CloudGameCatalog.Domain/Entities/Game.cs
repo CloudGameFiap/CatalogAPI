@@ -9,7 +9,7 @@ public sealed class Game : Entity<int>
     public string Genre { get; private set; }
     public DateTime ReleaseDate { get; private set; }
 
-    public bool Active { get; private set; }
+    public bool Active { get; private set; }    
 
     public Game(string name, string description, string? imageUrl, decimal price, string genre, DateTime releaseDate)
     {

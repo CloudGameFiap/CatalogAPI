@@ -3,6 +3,7 @@ using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -38,7 +39,7 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
 {
-    await appDbContext.Database.EnsureCreatedAsync();
+    await appDbContext.Database.MigrateAsync();
 }
 
 await app.RunAsync();
