@@ -6,8 +6,7 @@ using CloudGameCatalog.Domain.Interfaces;
 namespace CloudGameCatalog.Application.Handlers.GameHandler.Create;
 
 public sealed class CreateGameCommandHandler(
-    IGameWriteOnlyRepository gameWriteOnlyRepository,
-    IGameReadOnlyRepository gameReadOnlyRepository,
+    IGameWriteOnlyRepository gameWriteOnlyRepository,    
     IUnitOfWork unitOfWork) : IHandler<CreateGameCommand, CreateGameCommandResponse>
 {
     public async Task<Result<CreateGameCommandResponse>> HandleAsync(

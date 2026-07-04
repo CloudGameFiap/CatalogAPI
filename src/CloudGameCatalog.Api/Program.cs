@@ -1,3 +1,4 @@
+using CloudGameCatalog.Api.Extensions;
 using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
@@ -9,6 +10,7 @@ using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
