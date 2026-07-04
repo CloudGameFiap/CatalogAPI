@@ -4,6 +4,7 @@ using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
+using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
 using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
@@ -66,6 +67,30 @@ try
             };
         });
 
+    builder.Services.AddMassTransit(bus =>
+    {
+        bus.UsingRabbitMq((ctx, cfg) =>
+        {
+            var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+            var host = rabbitMqSection["Host"]!;
+            var username = rabbitMqSection["Username"]!;
+            var password = rabbitMqSection["Password"]!;
+
+            cfg.Host(host, "/", h =>
+            {
+                h.Username(username);
+                h.Password(password);
+            });
+
+            cfg.ConfigureEndpoints(ctx);
+
+            //cfg.Publish<UserCreatedEvent>(p =>
+            //{
+            //    p.ExchangeType = RabbitMQ.Client.ExchangeType.Direct;
+            //});
+        });
+    });
+
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
@@ -91,6 +116,14 @@ try
 
     gamesApi.MapPut("/", UpdateGameAsync)
         .WithName("UpdateGame");
+
+    var userGamesApi = app.MapGroup("/user-games");
+
+    //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
+    //    .WithName("GetGamesByUserIdAsync");
+
+    userGamesApi.MapPost("/", AddGameAsync)
+        .WithName("AddGameAsync");
 
     static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
         CancellationToken ct)
@@ -122,6 +155,19 @@ try
     static async Task<Results<Ok<Result<UpdateGameCommandResponse>>, BadRequest<Result<UpdateGameCommandResponse>>>> UpdateGameAsync([FromBody] UpdateGameCommand command, [FromServices] IHandler<UpdateGameCommand, UpdateGameCommandResponse> handler,
         CancellationToken ct)
     {
+        var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
+    static async Task<Results<Ok<Result<AddGameCommandResponse>>, BadRequest<Result<AddGameCommandResponse>>>> AddGameAsync([FromBody] AddGameCommand command, [FromServices] IHandler<AddGameCommand, AddGameCommandResponse> handler,
+    [FromServices] HttpContext httpContext,  CancellationToken ct)
+    {
+        var userId = int.Parse(httpContext.User.Claims.FirstOrDefault(s => s.Type == "UserId")?.Value ?? "0");
+
+        command.UserId = userId;
+
         var result = await handler.HandleAsync(command, ct);
 
         return result.IsSuccess ? TypedResults.Ok(result)

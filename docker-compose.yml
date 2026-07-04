@@ -33,6 +33,7 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     hostname: 'sqlserver'
+    container_name: sqlserver
     environment:
       ACCEPT_EULA: 'Y'
       MSSQL_SA_PASSWORD: "CloudGame#2026"
@@ -40,9 +41,7 @@ services:
       - sql_data:/var/opt/mssql
     restart: unless-stopped
     ports:
-      - '1433:1433'
-    expose:
-      - 1433
+      - '1433:1433'    
     healthcheck:
       test: ['CMD-SHELL', '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null']
       interval: 10s
@@ -61,10 +60,16 @@ services:
       - "5672:5672"   # AMQP
       - "15672:15672" # UI
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: cloudgame
+      RABBITMQ_DEFAULT_PASS: CloudGame#2026Rbt
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - cloudgame-network
 

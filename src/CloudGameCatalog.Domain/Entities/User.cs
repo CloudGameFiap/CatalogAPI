@@ -21,7 +21,7 @@ public sealed class User : Entity<int>
 
     public DateTime? UpdateAt { get; protected set; }
 
-    public bool IsAdmin { get; protected set; }
+    public bool IsAdmin { get; protected set; }    
 
     public static User Create(int Id, string Name, string Email, DateTime BirthDate, bool Active, DateTime CreatedAt, bool IsAdmin)
     {
