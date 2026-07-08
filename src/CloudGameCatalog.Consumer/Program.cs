@@ -51,7 +51,7 @@ try
     await using (var scope = app.Services.CreateAsyncScope())
     await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
     {
-        await appDbContext.Database.EnsureCreatedAsync();
+        await appDbContext.Database.MigrateAsync();
     }
 
     Log.Information("Pipeline successfully configured and application initialized...");
