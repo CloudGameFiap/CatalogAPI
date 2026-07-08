@@ -20,8 +20,4 @@
     <ProjectReference Include="..\CloudGameCatalog.Application\CloudGameCatalog.Application.csproj" />
     <ProjectReference Include="..\CloudGameCatalog.Infrastructure\CloudGameCatalog.Infrastructure.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Consumers\PaymentApi\" />
-  </ItemGroup>
 </Project>

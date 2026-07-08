@@ -11,10 +11,11 @@ public class UserGameMapping : IEntityTypeConfiguration<UserGame>
         builder.ToTable("UserGames");
         builder.HasKey(k => k.Id);
         builder.HasIndex(x => new { x.UserId, x.GameId }).IsUnique();
+
         builder.Property(x => x.UserId).IsRequired();
         builder.Property(x => x.GameId).IsRequired();
-        builder.Property(x => x.Status).HasColumnType("INT").IsRequired();
-        builder.Property(p => p.CreatedAt).HasColumnType("DATETIME2");             
+        builder.Property(x => x.Status).HasConversion<int>().IsRequired();
+        builder.Property(p => p.CreatedAt).HasColumnType("DATETIME2");
         builder.Property(p => p.Price).HasColumnType("DECIMAL(18,2)");
 
         builder.HasOne<User>()

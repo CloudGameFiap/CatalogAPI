@@ -7,6 +7,8 @@ services:
     ports:
       - '57398:8080'
       - '57399:8081'
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
     restart: unless-stopped
     depends_on:
       sqlserver:
