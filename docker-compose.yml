@@ -7,6 +7,8 @@ services:
     ports:
       - '57398:8080'
       - '57399:8081'
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false      
     restart: unless-stopped
     depends_on:
       sqlserver:
@@ -21,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: ./src/CloudGameCatalog.Consumer/Dockerfile
-    restart: unless-stopped
+    restart: unless-stopped    
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -76,6 +78,8 @@ services:
 volumes:
   sql_data:
   rabbitmq_data:
+
 networks:
   cloudgame-network:
+    name: cloudgame-network
     driver: bridge

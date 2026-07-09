@@ -1,5 +1,3 @@
-# Acesse https://aka.ms/customizecontainer para saber como personalizar seu contêiner de depuração e como o Visual Studio usa este Dockerfile para criar suas imagens para uma depuração mais rápida.
-
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 
 # Instala os pacotes ICU para habilitar suporte a dados e strings globais
@@ -30,8 +28,8 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./CloudGameCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
+# Esta fase é usada na produção ou quando executada no VS no modo normal
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet","CloudGameCatalog.Api.dll"]
+ENTRYPOINT ["dotnet", "CloudGameCatalog.Api.dll"]
