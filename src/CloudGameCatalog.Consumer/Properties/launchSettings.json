@@ -1,15 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "CloudGameCatalog.Consumer": {
       "commandName": "Project",
+      "dotnetRunMessages": true,
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true
+      }
     },
     "Container (Dockerfile)": {
-      "commandName": "Docker"
+      "commandName": "Docker",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Docker",
+        "DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTIONS": "true",
+        "Logging__Console__FormatterName": "Simple"
+      }
     }
-  },
-  "$schema": "https://json.schemastore.org/launchsettings.json"
+  }
 }

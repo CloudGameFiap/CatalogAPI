@@ -4,11 +4,16 @@ services:
     build:
       context: .
       dockerfile: ./src/CloudGameCatalog.Api/Dockerfile
+    user: "root"
     ports:
       - '57398:8080'
       - '57399:8081'
     environment:
       - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false      
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_ENVIRONMENT=Docker
+    volumes:
+    - ./src/CloudGameCatalog.Api/Logs:/app/Logs
     restart: unless-stopped
     depends_on:
       sqlserver:
@@ -23,6 +28,13 @@ services:
     build:
       context: .
       dockerfile: ./src/CloudGameCatalog.Consumer/Dockerfile
+    user: "root"
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_ENVIRONMENT=Docker
+    volumes:
+    - ./src/CloudGameCatalog.Consumer/Logs:/app/Logs
     restart: unless-stopped    
     depends_on:
       sqlserver:

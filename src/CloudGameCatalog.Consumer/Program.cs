@@ -6,7 +6,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -16,6 +15,12 @@ try
     Log.Information("Starting up the application...");
 
     var builder = Host.CreateApplicationBuilder(args);
+
+    builder.Services.AddSerilog((hostingContext, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(builder.Configuration);
+    });
 
     builder.Services.AddApplicationHandlers()
         .AddInfrastructureServices(builder.Configuration);
