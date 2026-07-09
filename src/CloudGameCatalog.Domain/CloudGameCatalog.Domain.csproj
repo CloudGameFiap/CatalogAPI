@@ -4,11 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Interfaces\IReadOnlyRepository.cs~RF1aed3d9d.TMP" />
-  </ItemGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />

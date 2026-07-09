@@ -1,9 +1,12 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
-RUN apk add --no-cache icu-libs icu-data-full
+FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine AS base
+RUN apk add --no-cache icu-libs
+
+# Informa ao .NET para desativar o modo invariante e usar o ICU
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 USER $APP_UID
 WORKDIR /app
 

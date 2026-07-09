@@ -1,7 +1,14 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
-RUN apk add --no-cache icu-libs icu-data-full
+
+# Instala os pacotes ICU para habilitar suporte a dados e strings globais
+RUN apk add --no-cache icu-libs
+
+# Desativa o modo invariante de globalização exigido pelo SQL Server
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
 
 # Esta fase é usada para compilar o projeto de serviço
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

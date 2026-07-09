@@ -4,42 +4,70 @@ using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
-var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddApplicationHandlers()
-    .AddInfrastructureServices(builder.Configuration);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddMassTransit(bus =>
+try
 {
-    bus.AddConsumer<UserCreatedConsumer>();
+    Log.Information("Starting up the application...");
 
-    bus.UsingRabbitMq((ctx, cfg) =>
+    var builder = Host.CreateApplicationBuilder(args);
+
+    builder.Services.AddApplicationHandlers()
+        .AddInfrastructureServices(builder.Configuration);
+
+    builder.Services.AddMassTransit(bus =>
     {
-        var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
-        var host = rabbitMqSection["Host"]!;
-        var username = rabbitMqSection["Username"]!;
-        var password = rabbitMqSection["Password"]!;
+        bus.AddConsumer<UserCreatedConsumer>();
 
-        cfg.Host(host, "/", h =>
+        bus.UsingRabbitMq((ctx, cfg) =>
         {
-            h.Username(username);
-            h.Password(password);
-        });
+            var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+            var host = rabbitMqSection["Host"]!;
+            var username = rabbitMqSection["Username"]!;
+            var password = rabbitMqSection["Password"]!;
 
-        cfg.ReceiveEndpoint("CloudGame.Domain.Events.User:UserCreatedEvent", e =>
-        {
-            e.Consumer<UserCreatedConsumer>(ctx);
+            cfg.Host(host, "/", h =>
+            {
+                h.Username(username);
+                h.Password(password);
+            });
+
+            cfg.ReceiveEndpoint("CloudGame.Domain.Events.User:UserCreatedEvent", e =>
+            {
+                e.Consumer<UserCreatedConsumer>(ctx);
+            });
         });
     });
-});
 
-var app = builder.Build();
+    var app = builder.Build();
 
-await using (var scope = app.Services.CreateAsyncScope())
-await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-{
-    await appDbContext.Database.MigrateAsync();
+    Log.Information("The application has been built, and star the pipeline setup has started.");
+
+    await using (var scope = app.Services.CreateAsyncScope())
+    await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
+    {
+        await appDbContext.Database.MigrateAsync();
+    }
+
+    Log.Information("Pipeline successfully configured and application initialized...");
+
+    await app.RunAsync();
 }
-
-await app.RunAsync();
+catch (Exception ex) when (ex.GetType().Name != "HostAbortedException")
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+catch (Exception)
+{
+    throw;
+}
+finally
+{
+    Log.Information("Shutting down the application...");
+    Log.CloseAndFlush();
+}

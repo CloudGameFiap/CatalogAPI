@@ -1,3 +1,4 @@
+using CloudGameCatalog.Api.Extensions;
 using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
@@ -10,10 +11,12 @@ using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
@@ -95,12 +98,15 @@ try
 
     app.UseSerilogRequestLogging();
 
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
     await using (var scope = app.Services.CreateAsyncScope())
     await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
     {
-        await appDbContext.Database.EnsureCreatedAsync();
+        await appDbContext.Database.MigrateAsync();
     }
 
     var gamesApi = app.MapGroup("/games");
@@ -121,7 +127,7 @@ try
         .WithName("UpdateGame")
         .RequireAuthorization();
 
-    var userGamesApi = app.MapGroup("/user-games");
+    var userGamesApi = app.MapGroup("/user-games").RequireAuthorization();
 
     //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
     //    .WithName("GetGamesByUserIdAsync");
