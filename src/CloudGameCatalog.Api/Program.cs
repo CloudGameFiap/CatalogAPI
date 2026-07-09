@@ -65,6 +65,8 @@ try
             };
         });
 
+    builder.Services.AddAuthorization();
+
     builder.Services.AddMassTransit(bus =>
     {
         bus.UsingRabbitMq((ctx, cfg) =>
@@ -104,16 +106,20 @@ try
     var gamesApi = app.MapGroup("/games");
 
     gamesApi.MapGet("/", FindGamesAsync)
-            .WithName("FindGames");
+            .WithName("FindGames")
+            .RequireAuthorization();
 
     gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
-        .WithName("GetGameById");
+        .WithName("GetGameById")
+        .RequireAuthorization();
 
     gamesApi.MapPost("/", CreateGameAsync)
-        .WithName("CreateGame");
+        .WithName("CreateGame")
+        .RequireAuthorization();
 
     gamesApi.MapPut("/", UpdateGameAsync)
-        .WithName("UpdateGame");
+        .WithName("UpdateGame")
+        .RequireAuthorization();
 
     var userGamesApi = app.MapGroup("/user-games");
 
@@ -121,7 +127,8 @@ try
     //    .WithName("GetGamesByUserIdAsync");
 
     userGamesApi.MapPost("/", AddGameAsync)
-        .WithName("AddGameAsync");
+        .WithName("AddGameAsync")
+        .RequireAuthorization();
 
     static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
         CancellationToken ct)
@@ -185,6 +192,9 @@ try
     }
 
     Log.Information("Pipeline successfully configured and application initialized...");
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     await app.RunAsync();
 }
