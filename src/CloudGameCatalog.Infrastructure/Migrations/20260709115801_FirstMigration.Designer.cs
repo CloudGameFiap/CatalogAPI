@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudGameCatalog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260708000508_FirstMigration")]
+    [Migration("20260709115801_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
@@ -69,7 +69,10 @@ namespace CloudGameCatalog.Infrastructure.Migrations
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("BIT");
@@ -96,7 +99,10 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>
@@ -113,9 +119,6 @@ namespace CloudGameCatalog.Infrastructure.Migrations
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GameId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("DECIMAL(18,2)");
 
@@ -125,16 +128,9 @@ namespace CloudGameCatalog.Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
-
-                    b.HasIndex("GameId1");
-
-                    b.HasIndex("UserId1");
 
                     b.HasIndex("UserId", "GameId")
                         .IsUnique();
@@ -144,28 +140,16 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>
                 {
-                    b.HasOne("CloudGameCatalog.Domain.Entities.Game", null)
+                    b.HasOne("CloudGameCatalog.Domain.Entities.Game", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CloudGameCatalog.Domain.Entities.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CloudGameCatalog.Domain.Entities.User", null)
+                    b.HasOne("CloudGameCatalog.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CloudGameCatalog.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Game");
