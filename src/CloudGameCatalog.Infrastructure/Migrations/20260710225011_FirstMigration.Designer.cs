@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudGameCatalog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260709115801_FirstMigration")]
+    [Migration("20260710225011_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
@@ -74,35 +74,9 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("BIT");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("DATETIME2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("DATETIME2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(120)");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("BIT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR(120)");
-
-                    b.Property<DateTime?>("UpdateAt")
-                        .HasColumnType("DATETIME2");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Users", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>

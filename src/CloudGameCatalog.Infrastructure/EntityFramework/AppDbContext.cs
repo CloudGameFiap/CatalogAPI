@@ -10,11 +10,9 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Game>();
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);            
         }
     }
 }
