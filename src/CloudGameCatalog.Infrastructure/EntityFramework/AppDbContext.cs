@@ -5,16 +5,17 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
 {
     public class AppDbContext : DbContext
     {
+        public DbSet<Game> Games { get; set; }
+        public DbSet<UserGame> UserGames { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Game>();
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
 }
