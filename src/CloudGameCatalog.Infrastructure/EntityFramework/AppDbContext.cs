@@ -5,9 +5,6 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<Game> Games { get; set; }
-        public DbSet<UserGame> UserGames { get; set; }
-
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         { }
 
@@ -16,6 +13,9 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+            modelBuilder.Entity<Game>();
+            modelBuilder.Entity<UserGame>();
         }
     }
 }
