@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CloudGameCatalog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260710223459_FirstMigration")]
+    [Migration("20260710225011_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />

@@ -12,10 +12,7 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-            modelBuilder.Entity<Game>();
-            modelBuilder.Entity<UserGame>();
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);            
         }
     }
 }
