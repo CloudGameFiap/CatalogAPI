@@ -32,6 +32,18 @@ namespace CloudGameCatalog.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserGames",
                 columns: table => new
                 {
@@ -80,6 +92,9 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Games");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }
