@@ -12,12 +12,23 @@ spec:
       labels:
         app: catalog-api
     spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done']
+        - name: wait-for-sqlserver
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z sqlserver 1433; do echo waiting for sqlserver; sleep 2; done']
       containers:
         - name: catalog-api
-          image: gpaschoal/cloudgamefiapcatalogapi:1.0
+          image: dpsnbsb79/cloudgamefiapcatalogapi:1.0
+          imagePullPolicy: Always
           resources:
-            limits:
+            requests:
               memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
               cpu: "500m"
           ports:
             - containerPort: 8080
@@ -26,6 +37,12 @@ spec:
                 name: catalog-api-config
             - secretRef:
                 name: catalog-api-secret
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /health/ready
