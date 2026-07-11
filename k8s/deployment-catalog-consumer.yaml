@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-consumer
+  template:
+    metadata:
+      labels:
+        app: catalog-consumer
+    spec:
+      containers:
+        - name: catalog-consumer
+          image: gpaschoal/cloudgamefiapcatalogconsumer:1.0
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: catalog-consumer-config
+            - secretRef:
+                name: catalog-consumer-secret
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
