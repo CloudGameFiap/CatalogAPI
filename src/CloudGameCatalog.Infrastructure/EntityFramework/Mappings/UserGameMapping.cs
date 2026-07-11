@@ -12,9 +12,9 @@ public class UserGameMapping : IEntityTypeConfiguration<UserGame>
         builder.HasKey(k => k.Id);
 
         builder.HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+    .WithMany()
+    .HasForeignKey(x => x.UserId)
+    .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Game)
             .WithMany()

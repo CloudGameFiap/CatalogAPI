@@ -168,7 +168,7 @@ try
     }
 
     static async Task<Results<Ok<Result<AddGameCommandResponse>>, BadRequest<Result<AddGameCommandResponse>>>> AddGameAsync([FromBody] AddGameCommand command, [FromServices] IHandler<AddGameCommand, AddGameCommandResponse> handler,
-    [FromServices] HttpContext httpContext,  CancellationToken ct)
+    HttpContext httpContext,  CancellationToken ct)
     {
         var userId = int.Parse(httpContext.User.Claims.FirstOrDefault(s => s.Type == "UserId")?.Value ?? "0");
 

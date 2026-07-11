@@ -2,6 +2,7 @@
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
+using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,8 @@ public static class ApplicationExtensions
 
         services.AddScoped<IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>, GetGameByIdQueryHandler>();
         services.AddScoped<IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>>, FindGamesQueryHandler>();
+
+        services.AddScoped<IHandler<AddGameCommand, AddGameCommandResponse>, AddGameCommandHandler>();
 
         return services;
     }

@@ -10,6 +10,10 @@ public sealed class UserMapping : IEntityTypeConfiguration<User>
     {
         builder.ToTable("Users");
         builder.HasKey(k => k.Id);
+
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
         builder.Ignore(p => p.Name);
         builder.Ignore(p => p.Email);
         builder.Ignore(p => p.BirthDate);

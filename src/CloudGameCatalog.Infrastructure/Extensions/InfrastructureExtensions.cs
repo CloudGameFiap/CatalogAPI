@@ -29,6 +29,8 @@ public static class InfrastructureExtensions
         services.AddScoped<IGameReadOnlyRepository, GameReadOnlyRepository>();
         services.AddScoped<IUserReadOnlyRepository, UserReadOnlyRepository>();
         services.AddScoped<IUserWriteOnlyRepository, UserWriteOnlyRepository>();
+        services.AddScoped<IUserGameWriteOnlyRepository, UserGameWriteOnlyRepository>();
+        services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
 
         return services;
