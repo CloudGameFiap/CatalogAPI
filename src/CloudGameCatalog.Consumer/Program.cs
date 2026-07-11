@@ -3,8 +3,8 @@ using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
-
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -15,6 +15,12 @@ try
     Log.Information("Starting up the application...");
 
     var builder = Host.CreateApplicationBuilder(args);
+
+    builder.Services.AddSerilog((hostingContext, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(builder.Configuration);
+    });
 
     builder.Services.AddApplicationHandlers()
         .AddInfrastructureServices(builder.Configuration);
@@ -50,7 +56,7 @@ try
     await using (var scope = app.Services.CreateAsyncScope())
     await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
     {
-        await appDbContext.Database.EnsureCreatedAsync();
+        await appDbContext.Database.MigrateAsync();
     }
 
     Log.Information("Pipeline successfully configured and application initialized...");

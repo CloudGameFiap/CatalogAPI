@@ -1,18 +1,22 @@
+using CloudGameCatalog.Api.Extensions;
 using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
+using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
 using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Parameters;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
+using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
@@ -35,7 +39,7 @@ try
     });
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    builder.Services.AddOpenApi();
+    //builder.Services.AddOpenApi();
 
     builder.Services.AddApplicationHandlers()
         .AddInfrastructureServices(builder.Configuration);
@@ -64,31 +68,73 @@ try
             };
         });
 
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddMassTransit(bus =>
+    {
+        bus.UsingRabbitMq((ctx, cfg) =>
+        {
+            var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+            var host = rabbitMqSection["Host"]!;
+            var username = rabbitMqSection["Username"]!;
+            var password = rabbitMqSection["Password"]!;
+
+            cfg.Host(host, "/", h =>
+            {
+                h.Username(username);
+                h.Password(password);
+            });
+
+            cfg.ConfigureEndpoints(ctx);
+
+            //cfg.Publish<UserCreatedEvent>(p =>
+            //{
+            //    p.ExchangeType = RabbitMQ.Client.ExchangeType.Direct;
+            //});
+        });
+    });
+
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
     await using (var scope = app.Services.CreateAsyncScope())
     await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
     {
-        await appDbContext.Database.EnsureCreatedAsync();
+        await appDbContext.Database.MigrateAsync();
     }
 
     var gamesApi = app.MapGroup("/games");
 
     gamesApi.MapGet("/", FindGamesAsync)
-            .WithName("FindGames");
+            .WithName("FindGames")
+            .RequireAuthorization();
 
     gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
-        .WithName("GetGameById");
+        .WithName("GetGameById")
+        .RequireAuthorization();
 
     gamesApi.MapPost("/", CreateGameAsync)
-        .WithName("CreateGame");
+        .WithName("CreateGame")
+        .RequireAuthorization();
 
     gamesApi.MapPut("/", UpdateGameAsync)
-        .WithName("UpdateGame");
+        .WithName("UpdateGame")
+        .RequireAuthorization();
+
+    var userGamesApi = app.MapGroup("/user-games").RequireAuthorization();
+
+    //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
+    //    .WithName("GetGamesByUserIdAsync");
+
+    userGamesApi.MapPost("/", AddGameAsync)
+        .WithName("AddGameAsync")
+        .RequireAuthorization();
 
     static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
         CancellationToken ct)
@@ -126,6 +172,19 @@ try
             : TypedResults.BadRequest(result);
     }
 
+    static async Task<Results<Ok<Result<AddGameCommandResponse>>, BadRequest<Result<AddGameCommandResponse>>>> AddGameAsync([FromBody] AddGameCommand command, [FromServices] IHandler<AddGameCommand, AddGameCommandResponse> handler,
+    HttpContext httpContext,  CancellationToken ct)
+    {
+        var userId = int.Parse(httpContext.User.Claims.FirstOrDefault(s => s.Type == "UserId")?.Value ?? "0");
+
+        command.UserId = userId;
+
+        var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -139,6 +198,9 @@ try
     }
 
     Log.Information("Pipeline successfully configured and application initialized...");
+
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     await app.RunAsync();
 }

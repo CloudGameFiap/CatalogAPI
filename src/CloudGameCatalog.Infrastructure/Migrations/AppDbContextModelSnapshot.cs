@@ -98,22 +98,54 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("IdGame")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("DATETIME2");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("DECIMAL(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdUser", "IdGame")
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("UserId", "GameId")
                         .IsUnique();
 
                     b.ToTable("UserGames", (string)null);
+                });
+
+            modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>
+                {
+                    b.HasOne("CloudGameCatalog.Domain.Entities.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CloudGameCatalog.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
