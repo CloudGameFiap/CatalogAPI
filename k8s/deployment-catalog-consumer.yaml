@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalog-api
+  name: catalog-consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catalog-api
+      app: catalog-consumer
   template:
     metadata:
       labels:
-        app: catalog-api
+        app: catalog-consumer
     spec:
       containers:
-        - name: catalog-api
-          image: gpaschoal/cloudgamefiapcatalogapi:latest
+        - name: catalog-consumer
+          image: gpaschoal/cloudgamefiapcatalogconsumer:1.0
           resources:
             limits:
               memory: "128Mi"
@@ -23,9 +23,9 @@ spec:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: catalog-api-config
+                name: catalog-consumer-config
             - secretRef:
-                name: catalog-api-secret
+                name: catalog-consumer-secret
           readinessProbe:
             httpGet:
               path: /health/ready
