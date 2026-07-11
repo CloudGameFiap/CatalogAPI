@@ -14,12 +14,12 @@ public sealed class UserMapping : IEntityTypeConfiguration<User>
         builder.Property(x => x.Id)
             .ValueGeneratedNever();
 
-        builder.Property(p => p.Name).IsRequired().HasColumnType("VARCHAR(120)");
-        builder.Property(p => p.Email).IsRequired().HasColumnType("VARCHAR(120)");
-        builder.Property(p => p.BirthDate).HasColumnType("DATETIME2");
-        builder.Property(p => p.CreatedAt).HasColumnType("DATETIME2");
-        builder.Property(p => p.UpdateAt).HasColumnType("DATETIME2");
-        builder.Property(p => p.Active).HasColumnType("BIT");
-        builder.Property(p => p.IsAdmin).HasColumnType("BIT");
+        builder.Ignore(p => p.Name);
+        builder.Ignore(p => p.Email);
+        builder.Ignore(p => p.BirthDate);
+        builder.Ignore(p => p.CreatedAt);
+        builder.Ignore(p => p.UpdateAt);
+        builder.Ignore(p => p.Active);
+        builder.Ignore(p => p.IsAdmin);
     }
 }

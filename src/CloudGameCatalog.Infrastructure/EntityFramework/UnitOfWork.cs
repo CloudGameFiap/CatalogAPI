@@ -11,7 +11,9 @@ namespace CloudGameCatalog.Infrastructure.EntityFramework
 
         public async Task<IDbTransaction> BeginTransationAsync(IsolationLevel isolationLevel)
         {
-            var transaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel);
+            var efIsolationLevel = (System.Data.IsolationLevel)isolationLevel;
+
+            var transaction = await _dbContext.Database.BeginTransactionAsync(efIsolationLevel);
 
             return transaction.GetDbTransaction();
         }
