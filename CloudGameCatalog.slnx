@@ -1,4 +1,14 @@
 <Solution>
+	<Folder Name="/k8s/">
+		<File Path="k8s/configmap-catalog-consumer.yaml" />
+		<File Path="k8s/configmap-catalog.yaml" />
+		<File Path="k8s/deployment-catalog-consumer.yaml" />
+		<File Path="k8s/deployment-catalog.yaml" />
+		<File Path="k8s/secret-catalog-consumer.yaml" />
+		<File Path="k8s/secret-catalog.yaml" />
+		<File Path="k8s/service-catalog-consumer.yaml" />
+		<File Path="k8s/service-catalog.yaml" />
+	</Folder>
 	<Folder Name="/src/">
 		<Project Path="src/CloudGameCatalog.Application/CloudGameCatalog.Application.csproj" />
 		<Project Path="src/CloudGameCatalog.Consumer/CloudGameCatalog.Consumer.csproj" Id="97b84def-b279-47e5-a1d5-44059db07c05" />
