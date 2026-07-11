@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.Development.json~RF3f5669d4.TMP" />
+    <None Remove="appsettings.Docker.json~RF96745083.TMP" />
   </ItemGroup> 
 
   <ItemGroup>

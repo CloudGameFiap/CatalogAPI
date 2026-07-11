@@ -66,10 +66,7 @@ namespace CloudGameCatalog.Infrastructure.Migrations
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("BIT");
@@ -96,10 +93,7 @@ namespace CloudGameCatalog.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("CloudGameCatalog.Domain.Entities.UserGame", b =>
