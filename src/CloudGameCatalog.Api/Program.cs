@@ -109,23 +109,19 @@ try
         await appDbContext.Database.MigrateAsync();
     }
 
-    var gamesApi = app.MapGroup("/games");
+    var gamesApi = app.MapGroup("/games").RequireAuthorization();
 
     gamesApi.MapGet("/", FindGamesAsync)
-            .WithName("FindGames")
-            .RequireAuthorization();
+            .WithName("FindGames").AllowAnonymous();
 
     gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
-        .WithName("GetGameById")
-        .RequireAuthorization();
+        .WithName("GetGameById");
 
     gamesApi.MapPost("/", CreateGameAsync)
-        .WithName("CreateGame")
-        .RequireAuthorization();
+        .WithName("CreateGame");
 
     gamesApi.MapPut("/", UpdateGameAsync)
-        .WithName("UpdateGame")
-        .RequireAuthorization();
+        .WithName("UpdateGame");
 
     var userGamesApi = app.MapGroup("/user-games").RequireAuthorization();
 
@@ -133,8 +129,7 @@ try
     //    .WithName("GetGamesByUserIdAsync");
 
     userGamesApi.MapPost("/", AddGameAsync)
-        .WithName("AddGameAsync")
-        .RequireAuthorization();
+        .WithName("AddGameAsync");
 
     static async Task<Results<Ok<Result<Pagination<FindGamesQueryResponse>>>, NotFound>> FindGamesAsync([AsParameters] FindGamesParameter parameters, [FromServices] IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>> handler,
         CancellationToken ct)
@@ -198,9 +193,6 @@ try
     }
 
     Log.Information("Pipeline successfully configured and application initialized...");
-
-    app.UseAuthentication();
-    app.UseAuthorization();
 
     await app.RunAsync();
 }
