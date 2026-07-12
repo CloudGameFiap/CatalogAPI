@@ -53,12 +53,6 @@ try
 
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
-    //await using (var scope = app.Services.CreateAsyncScope())
-    //await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-    //{
-    //    await appDbContext.Database.MigrateAsync();
-    //}
-
     Log.Information("Pipeline successfully configured and application initialized...");
 
     await app.RunAsync();
