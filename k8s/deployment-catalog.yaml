@@ -36,22 +36,4 @@ spec:
             - configMapRef:
                 name: catalog-api-config
             - secretRef:
-                name: catalog-api-secret
-          startupProbe:
-            httpGet:
-              path: /health/live
-              port: 8080
-            failureThreshold: 30
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /health/ready
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health/live
-              port: 8080
-            initialDelaySeconds: 20
-            periodSeconds: 20
+                name: catalog-api-secret          
