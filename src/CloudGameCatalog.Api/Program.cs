@@ -23,6 +23,7 @@ using Serilog;
 using System.Text;
 
 Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
