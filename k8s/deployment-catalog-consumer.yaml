@@ -16,17 +16,20 @@ spec:
         - name: wait-for-rabbitmq
           image: busybox:1.36
           command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done']
+        - name: wait-for-sqlserver
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z sqlserver 1433; do echo waiting for sqlserver; sleep 2; done']
       containers:
         - name: catalog-consumer
-          image: gpaschoal/cloudgamefiapcatalogconsumer:1.0
+          image: dpsnbsb79/cloudgamefiapcatalogconsumer:2.0
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "128Mi"
+              memory: "512Mi"
               cpu: "250m"
             limits:
-              memory: "256Mi"
-              cpu: "500m"
+              memory: "512Mi"
+              cpu: "1000m"
           envFrom:
             - configMapRef:
                 name: catalog-consumer-config
