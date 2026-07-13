@@ -102,6 +102,8 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.MapHealthChecks("/health");
+
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
     await using (var scope = app.Services.CreateAsyncScope())
@@ -110,7 +112,7 @@ try
         await appDbContext.Database.MigrateAsync();
     }
 
-    var gamesApi = app.MapGroup("/games").RequireAuthorization();
+    var gamesApi = app.MapGroup("/api/games").RequireAuthorization();
 
     gamesApi.MapGet("/", FindGamesAsync)
             .WithName("FindGames").AllowAnonymous();
@@ -124,7 +126,7 @@ try
     gamesApi.MapPut("/", UpdateGameAsync)
         .WithName("UpdateGame");
 
-    var userGamesApi = app.MapGroup("/user-games").RequireAuthorization();
+    var userGamesApi = app.MapGroup("/api/user-games").RequireAuthorization();
 
     //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
     //    .WithName("GetGamesByUserIdAsync");

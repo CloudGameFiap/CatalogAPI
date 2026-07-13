@@ -1,9 +1,7 @@
 using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
-using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
