@@ -5,6 +5,7 @@ using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
+using CloudGameCatalog.Application.Handlers.UserGameHandler.GetGamesByUserId;
 using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
@@ -68,7 +69,10 @@ try
             };
         });
 
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorization(opt=> {
+        opt.AddPolicy("admin", policy => policy.RequireRole("admin"));
+        opt.AddPolicy("user", policy => policy.RequireRole("user"));
+    });
 
     builder.Services.AddMassTransit(bus =>
     {
@@ -120,15 +124,15 @@ try
         .WithName("GetGameById");
 
     gamesApi.MapPost("/", CreateGameAsync)
-        .WithName("CreateGame");
+        .WithName("CreateGame").RequireAuthorization("admin");
 
     gamesApi.MapPut("/", UpdateGameAsync)
-        .WithName("UpdateGame");
+        .WithName("UpdateGame").RequireAuthorization("admin");
 
     var userGamesApi = app.MapGroup("/api/user-games").RequireAuthorization();
 
-    //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
-    //    .WithName("GetGamesByUserIdAsync");
+    userGamesApi.MapGet("/my-games", GetGamesByUserIdAsync)
+        .WithName("GetGamesByUserIdAsync");
 
     userGamesApi.MapPost("/", AddGameAsync)
         .WithName("AddGameAsync");
@@ -177,6 +181,17 @@ try
         command.UserId = userId;
 
         var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
+    static async Task<Results<Ok<Result<GetGamesByUserIdQueryResponse>>, BadRequest<Result<GetGamesByUserIdQueryResponse>>>> GetGamesByUserIdAsync([FromServices] IHandler<GetGamesByUserIdQuery, GetGamesByUserIdQueryResponse> handler,
+    HttpContext httpContext, CancellationToken ct)
+    {
+        var userId = int.Parse(httpContext.User.Claims.FirstOrDefault(s => s.Type == "UserId")?.Value ?? "0");       
+
+        var result = await handler.HandleAsync(new GetGamesByUserIdQuery() { UserId = userId }, ct);
 
         return result.IsSuccess ? TypedResults.Ok(result)
             : TypedResults.BadRequest(result);
