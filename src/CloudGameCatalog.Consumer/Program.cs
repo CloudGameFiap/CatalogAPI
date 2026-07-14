@@ -5,6 +5,7 @@ using MassTransit;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
