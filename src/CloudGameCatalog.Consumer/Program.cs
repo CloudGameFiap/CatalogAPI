@@ -1,4 +1,5 @@
 using CloudGameCatalog.Application.Extensions;
+using CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
 using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
@@ -27,6 +28,7 @@ try
     builder.Services.AddMassTransit(bus =>
     {
         bus.AddConsumer<UserCreatedConsumer>();
+        bus.AddConsumer<PaymentProcessedConsumer>();
 
         bus.UsingRabbitMq((ctx, cfg) =>
         {
@@ -44,6 +46,11 @@ try
             cfg.ReceiveEndpoint("CloudGame.Domain.Events.User:UserCreatedEvent", e =>
             {
                 e.Consumer<UserCreatedConsumer>(ctx);
+            });
+
+            cfg.ReceiveEndpoint("CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed:PaymentProcessedEvent", e =>
+            {
+                e.Consumer<PaymentProcessedConsumer>(ctx);
             });
         });
     });
