@@ -43,12 +43,12 @@ try
                 h.Password(password);
             });
 
-            cfg.ReceiveEndpoint("CloudGame.Domain.Events.User:UserCreatedEvent", e =>
+            cfg.ReceiveEndpoint("user-created-core", e =>
             {
                 e.Consumer<UserCreatedConsumer>(ctx);
             });
 
-            cfg.ReceiveEndpoint("CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed:PaymentProcessedEvent", e =>
+            cfg.ReceiveEndpoint("payment-processed-catalog", e =>
             {
                 e.Consumer<PaymentProcessedConsumer>(ctx);
             });
