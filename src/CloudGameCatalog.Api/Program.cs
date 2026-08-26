@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
+using Prometheus;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -39,6 +40,9 @@ try
         configuration
             .ReadFrom.Configuration(hostingContext.Configuration);
     });
+
+    builder.Services.AddControllers();
+    builder.Services.AddHealthChecks();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     //builder.Services.AddOpenApi();
@@ -107,6 +111,12 @@ try
     app.UseAuthorization();
 
     app.MapHealthChecks("/health");
+
+    app.UseHttpMetrics();
+
+    app.MapControllers();
+
+    app.MapMetrics("/metrics");
 
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
