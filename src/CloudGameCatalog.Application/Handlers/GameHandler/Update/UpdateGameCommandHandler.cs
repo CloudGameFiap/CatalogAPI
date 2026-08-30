@@ -7,9 +7,12 @@ namespace CloudGameCatalog.Application.Handlers.GameHandler.Update;
 public sealed class UpdateGameCommandHandler(
     IGameWriteOnlyRepository gameWriteOnlyRepository,
     IGameReadOnlyRepository gameReadOnlyRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService)
     : IHandler<UpdateGameCommand, UpdateGameCommandResponse>
 {
+    private const string CollectionName = "Games";
+
     public async Task<Result<UpdateGameCommandResponse>> HandleAsync(
         UpdateGameCommand command,
         CancellationToken cancellationToken)
@@ -19,12 +22,25 @@ public sealed class UpdateGameCommandHandler(
         if (gameToUpdate is null)
             return Result<UpdateGameCommandResponse>.Failure([new Error("NotFound", "Jogo não encontrado")]);
 
-        gameToUpdate.Update(command.Name, command.Description, command.ImageUrl, command.Price, command.Genre, command.ReleaseDate);
+        var cacheKey = $"game:{command.Id}";
+
+        gameToUpdate.Update
+        (
+            command.Name,
+            command.Description,
+            command.ImageUrl,
+            command.Price,
+            command.Genre,
+            command.ReleaseDate
+        );
 
         await gameWriteOnlyRepository.UpdateAsync(gameToUpdate);
 
         await unitOfWork.SaveChangesAsync();
 
-        return Result<UpdateGameCommandResponse>.Success(new UpdateGameCommandResponse(gameToUpdate.Id, gameToUpdate.Name, gameToUpdate.Active));
+        await cacheService.RemoveAsync(CollectionName, cacheKey, cancellationToken);
+
+        return Result<UpdateGameCommandResponse>.Success(
+            new UpdateGameCommandResponse(gameToUpdate.Id, gameToUpdate.Name, gameToUpdate.Active));
     }
 }

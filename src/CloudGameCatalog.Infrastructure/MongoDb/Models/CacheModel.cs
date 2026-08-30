@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace CloudGameCatalog.Infrastructure.MongoDb.Models;
 
-public class GameCacheModel
+public class CacheModel
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]

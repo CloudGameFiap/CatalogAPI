@@ -4,6 +4,8 @@ using CloudGameCatalog.Infrastructure.Dapper.Contracts;
 using CloudGameCatalog.Infrastructure.Dapper.Repositories;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.EntityFramework.Repositories;
+using CloudGameCatalog.Infrastructure.MongoDb;
+using CloudGameCatalog.Infrastructure.MongoDb.Context;
 using CloudGameCatalog.Infrastructure.MongoDb.Repositories;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +36,14 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
 
-        services.AddSingleton<IGameCacheService, MongoGameCacheService>();
+        // 1. Mapeia a seção do appsettings/env
+        services.Configure<MongoDbOptions>(configuration.GetSection("MongoDbCache"));
+
+        // 2. Contexto como Singleton (MongoClient gerencia o pool de conexões internamente)
+        services.AddSingleton<IMongoDbContext, MongoDbContext>();
+
+        // 3. Serviço de Cache
+        services.AddScoped<ICacheService, MongoCacheService>();
 
         return services;
     }
