@@ -8,7 +8,7 @@ public sealed class FindGamesQueryHandler(
     IGameReadOnlyRepository GameReadOnlyRepository,
     ICacheService cacheService) : IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>>
 {
-    private const string CollectionName = "Games";
+    private const string CollectionGames = "Games";
 
     public async Task<Result<Pagination<FindGamesQueryResponse>>> HandleAsync(FindGamesQuery request, CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public sealed class FindGamesQueryHandler(
         var searchPattern = string.IsNullOrWhiteSpace(request.Parameters.Name) ? "all" : request.Parameters.Name;
         var cacheKey = $"games:page:{request.Parameters.PageNumber}:size:{request.Parameters.PageSize}:search:{searchPattern}";
 
-        var cachedPagination = await cacheService.GetAsync<Pagination<FindGamesQueryResponse>>(CollectionName, cacheKey, cancellationToken);
+        var cachedPagination = await cacheService.GetAsync<Pagination<FindGamesQueryResponse>>(CollectionGames, cacheKey, cancellationToken);
         if (cachedPagination != null)
         {
             return Result<Pagination<FindGamesQueryResponse>>.Success(cachedPagination);
@@ -35,7 +35,7 @@ public sealed class FindGamesQueryHandler(
         if (gamesResponse.Count > 0)
         {
             await cacheService.SetAsync(
-                CollectionName,
+                CollectionGames,
                 cacheKey,
                 paginationResult,
                 TimeSpan.FromSeconds(30),

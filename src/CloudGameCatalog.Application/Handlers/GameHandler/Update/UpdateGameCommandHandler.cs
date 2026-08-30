@@ -11,7 +11,7 @@ public sealed class UpdateGameCommandHandler(
     ICacheService cacheService)
     : IHandler<UpdateGameCommand, UpdateGameCommandResponse>
 {
-    private const string CollectionName = "Games";
+    private const string CollectionGames = "Games";
 
     public async Task<Result<UpdateGameCommandResponse>> HandleAsync(
         UpdateGameCommand command,
@@ -38,7 +38,7 @@ public sealed class UpdateGameCommandHandler(
 
         await unitOfWork.SaveChangesAsync();
 
-        await cacheService.RemoveAsync(CollectionName, cacheKey, cancellationToken);
+        await cacheService.RemoveAsync(CollectionGames, cacheKey, cancellationToken);
 
         return Result<UpdateGameCommandResponse>.Success(
             new UpdateGameCommandResponse(gameToUpdate.Id, gameToUpdate.Name, gameToUpdate.Active));
