@@ -19,7 +19,7 @@ public class MongoDbContext : IMongoDbContext
     {
         var collection = _database.GetCollection<CacheModel>(collectionName);
 
-        // Garante o índice TTL de forma idempotente (só cria se não existir)
+
         var indexKeys = Builders<CacheModel>.IndexKeys.Ascending(x => x.ExpiresAt);
         var indexOptions = new CreateIndexOptions { ExpireAfter = TimeSpan.Zero };
         collection.Indexes.CreateOne(new CreateIndexModel<CacheModel>(indexKeys, indexOptions));
