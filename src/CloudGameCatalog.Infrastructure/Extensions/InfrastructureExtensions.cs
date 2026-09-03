@@ -36,13 +36,10 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
 
-        // 1. Mapeia a seção do appsettings/env
-        services.Configure<MongoDbOptions>(configuration.GetSection("MongoDbCache"));
+        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.SectionName));
 
-        // 2. Contexto como Singleton (MongoClient gerencia o pool de conexões internamente)
         services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
-        // 3. Serviço de Cache
         services.AddScoped<ICacheService, MongoCacheService>();
 
         return services;
