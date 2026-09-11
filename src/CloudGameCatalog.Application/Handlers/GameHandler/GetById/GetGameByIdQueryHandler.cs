@@ -4,14 +4,36 @@ using CloudGameCatalog.Domain.Interfaces;
 
 namespace CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 
-public sealed class GetGameByIdQueryHandler(IGameReadOnlyRepository gameReadOnlyRepository) : IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>
+public sealed class GetGameByIdQueryHandler(IGameReadOnlyRepository gameReadOnlyRepository, ICacheService cacheService) : IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>
 {
+    private const string CollectionGames = "Games";
+
     public async Task<Result<GetGameByIdQueryResponse>> HandleAsync(GetGameByIdQuery request, CancellationToken cancellationToken)
     {
+        var cacheKey = $"game:{request.Id}";
+
+        var cachedGame = await cacheService.GetAsync<GetGameByIdQueryResponse>(CollectionGames, cacheKey, cancellationToken);
+        if (cachedGame != null)
+        {
+            return Result<GetGameByIdQueryResponse>.Success(cachedGame);
+        }
+
         var game = await gameReadOnlyRepository.GetByIdAsync(request.Id);
         if (game is null)
             return Result<GetGameByIdQueryResponse>.Failure([new("NotFound", "Não foi encontrado jogo com id passado.")]);
 
-        return Result<GetGameByIdQueryResponse>.Success(new GetGameByIdQueryResponse(game.Id, game.Name, game.Description, game.ImageUrl, game.Price, game.Genre, game.ReleaseDate, game.Active));
+        var response = new GetGameByIdQueryResponse(
+            game.Id,
+            game.Name,
+            game.Description,
+            game.ImageUrl,
+            game.Price,
+            game.Genre,
+            game.ReleaseDate,
+            game.Active);
+
+        await cacheService.SetAsync(CollectionGames, cacheKey, response, TimeSpan.FromMinutes(30), cancellationToken);
+
+        return Result<GetGameByIdQueryResponse>.Success(response);
     }
 }
