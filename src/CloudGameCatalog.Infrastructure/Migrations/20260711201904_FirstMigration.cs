@@ -88,6 +88,11 @@ namespace CloudGameCatalog.Infrastructure.Migrations
                 table: "UserGames",
                 columns: new[] { "UserId", "GameId" },
                 unique: true);
+
+            migrationBuilder.InsertData(
+      table: "Users",
+      columns: new[] { "Id", "Name", "Email", "BirthDate", "Active", "IsAdmin", "CreatedAt" },
+      values: new object[] { 1, "Admin", "admin@cloudgame.com", new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc),true,true, new DateTime(2026, 7, 13, 0, 0, 0, DateTimeKind.Utc) });
         }
 
         /// <inheritdoc />

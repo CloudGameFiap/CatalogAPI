@@ -5,6 +5,7 @@ using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
+using CloudGameCatalog.Application.Handlers.UserGameHandler.GetGamesByUserId;
 using CloudGameCatalog.Application.Settings;
 using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Handlers;
@@ -21,8 +22,10 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
+using Prometheus;
 
 Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
@@ -37,6 +40,9 @@ try
         configuration
             .ReadFrom.Configuration(hostingContext.Configuration);
     });
+
+    builder.Services.AddControllers();
+    builder.Services.AddHealthChecks();
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     //builder.Services.AddOpenApi();
@@ -68,7 +74,10 @@ try
             };
         });
 
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorization(opt=> {
+        opt.AddPolicy("admin", policy => policy.RequireRole("admin"));
+        opt.AddPolicy("user", policy => policy.RequireRole("user"));
+    });
 
     builder.Services.AddMassTransit(bus =>
     {
@@ -101,6 +110,14 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.MapHealthChecks("/health");
+
+    app.UseHttpMetrics();
+
+    app.MapControllers();
+
+    app.MapMetrics("/metrics");
+
     Log.Information("The application has been built, and star the pipeline setup has started.");
 
     await using (var scope = app.Services.CreateAsyncScope())
@@ -109,7 +126,7 @@ try
         await appDbContext.Database.MigrateAsync();
     }
 
-    var gamesApi = app.MapGroup("/games").RequireAuthorization();
+    var gamesApi = app.MapGroup("/api/games").RequireAuthorization();
 
     gamesApi.MapGet("/", FindGamesAsync)
             .WithName("FindGames").AllowAnonymous();
@@ -118,15 +135,15 @@ try
         .WithName("GetGameById");
 
     gamesApi.MapPost("/", CreateGameAsync)
-        .WithName("CreateGame");
+        .WithName("CreateGame").RequireAuthorization("admin");
 
     gamesApi.MapPut("/", UpdateGameAsync)
-        .WithName("UpdateGame");
+        .WithName("UpdateGame").RequireAuthorization("admin");
 
-    var userGamesApi = app.MapGroup("/user-games").RequireAuthorization();
+    var userGamesApi = app.MapGroup("/api/user-games").RequireAuthorization();
 
-    //userGamesApi.MapGet("/{id:int}", GetGamesByUserIdAsync)
-    //    .WithName("GetGamesByUserIdAsync");
+    userGamesApi.MapGet("/my-games", GetGamesByUserIdAsync)
+        .WithName("GetGamesByUserIdAsync");
 
     userGamesApi.MapPost("/", AddGameAsync)
         .WithName("AddGameAsync");
@@ -175,6 +192,17 @@ try
         command.UserId = userId;
 
         var result = await handler.HandleAsync(command, ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.BadRequest(result);
+    }
+
+    static async Task<Results<Ok<Result<GetGamesByUserIdQueryResponse>>, BadRequest<Result<GetGamesByUserIdQueryResponse>>>> GetGamesByUserIdAsync([FromServices] IHandler<GetGamesByUserIdQuery, GetGamesByUserIdQueryResponse> handler,
+    HttpContext httpContext, CancellationToken ct)
+    {
+        var userId = int.Parse(httpContext.User.Claims.FirstOrDefault(s => s.Type == "UserId")?.Value ?? "0");       
+
+        var result = await handler.HandleAsync(new GetGamesByUserIdQuery() { UserId = userId }, ct);
 
         return result.IsSuccess ? TypedResults.Ok(result)
             : TypedResults.BadRequest(result);

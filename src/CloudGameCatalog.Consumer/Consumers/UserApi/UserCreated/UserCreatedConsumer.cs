@@ -8,11 +8,14 @@ namespace CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 internal class UserCreatedConsumer(
     IUserWriteOnlyRepository userWriteOnlyRepository,
     IUserReadOnlyRepository userReadOnlyRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ILogger<UserCreatedConsumer> logger)
     : IConsumer<UserCreatedEvent>
 {
     public async Task Consume(ConsumeContext<UserCreatedEvent> context)
     {
+        logger.LogInformation("Receive event UserCreatedEvent.");
+
         if (context.Message is null) return;
 
         var existingUser = await userReadOnlyRepository.GetByIdAsync(context.Message.Id);
@@ -34,5 +37,7 @@ internal class UserCreatedConsumer(
         await userWriteOnlyRepository.AddAsync(user);
 
         await unitOfWork.SaveChangesAsync();
+
+        logger.LogInformation("Received event UserCreatedEvent processed.");
     }
 }

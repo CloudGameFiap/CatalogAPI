@@ -1,12 +1,12 @@
 using CloudGameCatalog.Application.Extensions;
+using CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
 using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
-using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.Extensions;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
@@ -28,6 +28,7 @@ try
     builder.Services.AddMassTransit(bus =>
     {
         bus.AddConsumer<UserCreatedConsumer>();
+        bus.AddConsumer<PaymentProcessedConsumer>();
 
         bus.UsingRabbitMq((ctx, cfg) =>
         {
@@ -42,9 +43,14 @@ try
                 h.Password(password);
             });
 
-            cfg.ReceiveEndpoint("CloudGame.Domain.Events.User:UserCreatedEvent", e =>
+            cfg.ReceiveEndpoint("user-created-core", e =>
             {
                 e.Consumer<UserCreatedConsumer>(ctx);
+            });
+
+            cfg.ReceiveEndpoint("payment-processed-catalog", e =>
+            {
+                e.Consumer<PaymentProcessedConsumer>(ctx);
             });
         });
     });
@@ -52,12 +58,6 @@ try
     var app = builder.Build();
 
     Log.Information("The application has been built, and star the pipeline setup has started.");
-
-    await using (var scope = app.Services.CreateAsyncScope())
-    await using (var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-    {
-        await appDbContext.Database.MigrateAsync();
-    }
 
     Log.Information("Pipeline successfully configured and application initialized...");
 
