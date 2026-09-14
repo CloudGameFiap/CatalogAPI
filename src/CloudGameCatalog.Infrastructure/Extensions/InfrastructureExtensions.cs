@@ -6,6 +6,9 @@ using CloudGameCatalog.Infrastructure.Dapper.Contracts;
 using CloudGameCatalog.Infrastructure.Dapper.Repositories;
 using CloudGameCatalog.Infrastructure.EntityFramework;
 using CloudGameCatalog.Infrastructure.EntityFramework.Repositories;
+using CloudGameCatalog.Infrastructure.MongoDb;
+using CloudGameCatalog.Infrastructure.MongoDb.Context;
+using CloudGameCatalog.Infrastructure.MongoDb.Repositories;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +38,12 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
         services.AddScoped<ICacheService, RedisCacheService>();
+
+        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.SectionName));
+
+        services.AddSingleton<IMongoDbContext, MongoDbContext>();
+
+        services.AddScoped<ICacheService, MongoCacheService>();
 
         return services;
     }
