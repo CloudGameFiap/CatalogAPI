@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CloudGameCatalog.Application\CloudGameCatalog.Application.csproj" />
     <ProjectReference Include="..\CloudGameCatalog.Domain\CloudGameCatalog.Domain.csproj" />
   </ItemGroup>
 

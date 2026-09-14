@@ -1,4 +1,5 @@
-﻿using CloudGameCatalog.Domain.Commom;
+﻿using CloudGameCatalog.Application.Interfaces;
+using CloudGameCatalog.Domain.Commom;
 using CloudGameCatalog.Domain.Commom.Events;
 using CloudGameCatalog.Domain.Entities;
 using CloudGameCatalog.Domain.Handlers;
@@ -13,13 +14,14 @@ namespace CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame
         IUserGameWriteOnlyRepository userGameWriteOnlyRepository,
         IUserGameReadOnlyRepository userGameReadOnlyRepository,
         IPublishEndpoint publishEndpoint,
-        IUnitOfWork unitOfWork) : IHandler<AddGameCommand, AddGameCommandResponse>
+        IUnitOfWork unitOfWork,
+        ICacheService cacheService) : IHandler<AddGameCommand, AddGameCommandResponse>
     {
         public async Task<Result<AddGameCommandResponse>> HandleAsync(
             AddGameCommand command,
             CancellationToken cancellationToken)
         {
-            var user = await userReadOnlyRepository.GetByIdAsync(command.UserId);
+            var user = await GetUserWithCacheAsync(command.UserId);
 
             if (user is null)
             {
@@ -49,6 +51,22 @@ namespace CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame
             await publishEndpoint.Publish(new OrderPlacedEvent(command.UserId, command.GameId, command.Price), cancellationToken);
 
             return Result<AddGameCommandResponse>.Success(new AddGameCommandResponse(userGame.Id));
+        }
+
+        private async Task<User?> GetUserWithCacheAsync(int userId)
+        {
+            var cacheKey = $"user:{userId}";
+
+            var cached = await cacheService.GetAsync<User>(cacheKey);
+            if (cached is not null)
+                return cached;
+
+            var user = await userReadOnlyRepository.GetByIdAsync(userId);
+
+            if (user is not null)
+                await cacheService.SetAsync(cacheKey, user, TimeSpan.FromMinutes(15));
+
+            return user;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using CloudGameCatalog.Domain.Interfaces;
+﻿using CloudGameCatalog.Application.Interfaces;
+using CloudGameCatalog.Domain.Interfaces;
+using CloudGameCatalog.Infrastructure.Cache;
 using CloudGameCatalog.Infrastructure.Dapper;
 using CloudGameCatalog.Infrastructure.Dapper.Contracts;
 using CloudGameCatalog.Infrastructure.Dapper.Repositories;
@@ -32,6 +34,7 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserGameWriteOnlyRepository, UserGameWriteOnlyRepository>();
         services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
+        services.AddScoped<ICacheService, RedisCacheService>();
 
         return services;
     }

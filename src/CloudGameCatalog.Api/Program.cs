@@ -44,6 +44,12 @@ try
     builder.Services.AddControllers();
     builder.Services.AddHealthChecks();
 
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = builder.Configuration.GetConnectionString("Redis"); // "redis:6379" dentro do cluster
+        options.InstanceName = "CloudGame:";
+    });
+
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     //builder.Services.AddOpenApi();
 

@@ -34,6 +34,14 @@ services:
     networks:
       - cloudgame-network  
 
+  redis:
+    image: redis:7-alpine
+    container_name: cloudgame-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - cloudgame-network
+
 networks:
   cloudgame-network:
     external: true
