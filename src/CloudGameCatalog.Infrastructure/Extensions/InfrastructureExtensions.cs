@@ -37,7 +37,7 @@ public static class InfrastructureExtensions
         services.AddScoped<IUserGameWriteOnlyRepository, UserGameWriteOnlyRepository>();
         services.AddScoped<IUserGameReadOnlyRepository, UserGameReadOnlyRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<AppDbContext>()));
-        services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddScoped<IRedisCacheService, RedisCacheService>();
 
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.SectionName));
 

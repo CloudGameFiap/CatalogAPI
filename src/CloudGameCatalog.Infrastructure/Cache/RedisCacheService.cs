@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace CloudGameCatalog.Infrastructure.Cache
 {
-    public class RedisCacheService: ICacheService
+    public class RedisCacheService: IRedisCacheService
     {
         private readonly IDistributedCache _distributedCache;
 
