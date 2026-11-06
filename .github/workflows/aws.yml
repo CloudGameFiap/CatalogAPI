@@ -65,8 +65,8 @@ jobs:
           echo "latest=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest" >> "$GITHUB_OUTPUT"
 
       - name: Docker build
-        # Ajuste o -f e o contexto conforme a localizacao do seu Dockerfile
-        run: docker build -f ./src/CloudGameCatalog.Api/Dockerfile -t ${{ steps.meta.outputs.image }} -t ${{ steps.meta.outputs.latest }} .
+        # Ajuste o -f e o contexto conforme a localização do seu Dockerfile
+        run: docker build -f ./src/CloudGame.API/Dockerfile -t ${{ steps.meta.outputs.image }} -t ${{ steps.meta.outputs.latest }} .
 
       - name: Security scan (Trivy) - desejavel
         uses: aquasecurity/trivy-action@v0.36.0
