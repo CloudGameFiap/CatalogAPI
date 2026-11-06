@@ -72,7 +72,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ steps.meta.outputs.image }}
-          severity: CRITICAL, HIGH
+          severity: CRITICAL,HIGH
           exit-code: '0'   # mude para '1' se quiser bloquear o deploy com vulnerabilidades
 
       - name: Push para o ECR
