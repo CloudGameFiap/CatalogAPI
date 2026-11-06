@@ -57,7 +57,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Definir nome da imagem
+      - name: latest
         id: meta
         run: |
           TAG=${GITHUB_SHA::7}
