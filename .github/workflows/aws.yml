@@ -17,24 +17,27 @@ env:
   CONTAINER: user-api       # nome do container dentro do Deployment
 
 jobs:
-  # 1) Build e testes unitarios (roda tambem em Pull Request)
-#  build-test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
+  # 1) Build e testes unitários (roda também em Pull Request)
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src  
+    steps:
+      - uses: actions/checkout@v4
 
-#      - uses: actions/setup-dotnet@v4
-#        with:
-#          dotnet-version: 8.0.x   # ajuste para a versao do seu projeto
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x  
 
-#      - name: Restore
-#        run: dotnet restore
+      - name: Restore
+        run: dotnet restore "./CloudGameCatalog.Api/CloudGameCatalog.Api.csproj" 
 
-#      - name: Build
-#        run: dotnet build --no-restore -c Release
+      - name: Build
+        run: dotnet build "./CloudGameCatalog.Api/CloudGameCatalog.Api.csproj"  --no-restore -c Release
 
-#      - name: Testes unitários
-#        run: dotnet test --no-build -c Release
+   #   - name: Testes unitários
+   #     run: dotnet test "" --no-build -c Release
 
   # 2) Imagem Docker com tag versionada + scan + push para o ECR (so na main)
   docker-push:
