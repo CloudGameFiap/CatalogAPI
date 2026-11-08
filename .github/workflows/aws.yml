@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: cloudgame/user-api
+  ECR_REPOSITORY: cloudgame/catalog-api
   EKS_CLUSTER: CloudGame-cluster
   DEPLOYMENT: user-api      # nome do Deployment no Kubernetes
   CONTAINER: user-api       # nome do container dentro do Deployment
