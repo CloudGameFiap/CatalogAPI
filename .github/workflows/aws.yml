@@ -83,11 +83,11 @@ jobs:
           docker push ${{ steps.meta.outputs.image }}
           docker push ${{ steps.meta.outputs.latest }}
           
-   #3) Deploy no EKS com Rolling Update
-     deploy:
-      needs: docker-push
-      runs-on: ubuntu-latest
-      steps:
+  # 3) Deploy no EKS com Rolling Update
+  deploy:
+    needs: docker-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
