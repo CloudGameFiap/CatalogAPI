@@ -1,13 +1,16 @@
 ﻿using CloudGameCatalog.Domain.Commom;
+using CloudGameCatalog.Domain.Commom.Events;
 using CloudGameCatalog.Domain.Entities;
 using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Interfaces;
+using MassTransit;
 
 namespace CloudGameCatalog.Application.Handlers.GameHandler.Create;
 
 public sealed class CreateGameCommandHandler(
-    IGameWriteOnlyRepository gameWriteOnlyRepository,    
-    IUnitOfWork unitOfWork) : IHandler<CreateGameCommand, CreateGameCommandResponse>
+    IGameWriteOnlyRepository gameWriteOnlyRepository,
+    IUnitOfWork unitOfWork,
+    IPublishEndpoint publishEndpoint) : IHandler<CreateGameCommand, CreateGameCommandResponse>
 {
     public async Task<Result<CreateGameCommandResponse>> HandleAsync(
         CreateGameCommand command,
@@ -18,6 +21,8 @@ public sealed class CreateGameCommandHandler(
         await gameWriteOnlyRepository.AddAsync(newGame);
 
         await unitOfWork.SaveChangesAsync();
+
+        await publishEndpoint.Publish(new GameIndexRequestedEvent(newGame.Id), cancellationToken);
 
         return Result<CreateGameCommandResponse>.Success(new CreateGameCommandResponse(newGame.Id, newGame.Name, newGame.Active));
     }

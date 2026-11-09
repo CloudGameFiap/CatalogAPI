@@ -1,6 +1,7 @@
 ﻿using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
+using CloudGameCatalog.Application.Handlers.GameHandler.Search;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.GetGamesByUserId;
@@ -19,6 +20,7 @@ public static class ApplicationExtensions
 
         services.AddScoped<IHandler<GetGameByIdQuery, GetGameByIdQueryResponse>, GetGameByIdQueryHandler>();
         services.AddScoped<IHandler<FindGamesQuery, Pagination<FindGamesQueryResponse>>, FindGamesQueryHandler>();
+        services.AddScoped<IHandler<SearchGamesQuery, Pagination<SearchGamesQueryResponse>>, SearchGamesQueryHandler>();
 
         services.AddScoped<IHandler<AddGameCommand, AddGameCommandResponse>, AddGameCommandHandler>();
 

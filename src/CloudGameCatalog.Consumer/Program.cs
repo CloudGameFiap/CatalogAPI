@@ -1,4 +1,5 @@
 using CloudGameCatalog.Application.Extensions;
+using CloudGameCatalog.Consumer.Consumers.CatalogApi.GameIndexRequested;
 using CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
 using CloudGameCatalog.Consumer.Consumers.UserApi.UserCreated;
 using CloudGameCatalog.Infrastructure.Extensions;
@@ -29,6 +30,7 @@ try
     {
         bus.AddConsumer<UserCreatedConsumer>();
         bus.AddConsumer<PaymentProcessedConsumer>();
+        bus.AddConsumer<GameIndexRequestedConsumer>();
 
         bus.UsingRabbitMq((ctx, cfg) =>
         {
@@ -51,6 +53,12 @@ try
             cfg.ReceiveEndpoint("payment-processed-catalog", e =>
             {
                 e.Consumer<PaymentProcessedConsumer>(ctx);
+            });
+
+            cfg.ReceiveEndpoint("game-index-requested-catalog", e =>
+            {
+                e.UseMessageRetry(r => r.Incremental(5, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5)));
+                e.Consumer<GameIndexRequestedConsumer>(ctx);
             });
         });
     });

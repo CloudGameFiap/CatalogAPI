@@ -1,6 +1,8 @@
 ﻿using CloudGameCatalog.Domain.Commom;
+using CloudGameCatalog.Domain.Commom.Events;
 using CloudGameCatalog.Domain.Handlers;
 using CloudGameCatalog.Domain.Interfaces;
+using MassTransit;
 
 namespace CloudGameCatalog.Application.Handlers.GameHandler.Update;
 
@@ -8,7 +10,8 @@ public sealed class UpdateGameCommandHandler(
     IGameWriteOnlyRepository gameWriteOnlyRepository,
     IGameReadOnlyRepository gameReadOnlyRepository,
     IUnitOfWork unitOfWork,
-    ICacheService cacheService)
+    ICacheService cacheService,
+    IPublishEndpoint publishEndpoint)
     : IHandler<UpdateGameCommand, UpdateGameCommandResponse>
 {
     private const string CollectionGames = "Games";
@@ -39,6 +42,8 @@ public sealed class UpdateGameCommandHandler(
         await unitOfWork.SaveChangesAsync();
 
         await cacheService.RemoveAsync(CollectionGames, cacheKey, cancellationToken);
+
+        await publishEndpoint.Publish(new GameIndexRequestedEvent(gameToUpdate.Id), cancellationToken);
 
         return Result<UpdateGameCommandResponse>.Success(
             new UpdateGameCommandResponse(gameToUpdate.Id, gameToUpdate.Name, gameToUpdate.Active));
