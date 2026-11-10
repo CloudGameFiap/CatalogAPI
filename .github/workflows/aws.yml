@@ -104,4 +104,4 @@ jobs:
             ${{ env.CONTAINER }}=${{ needs.docker-push.outputs.image }}
 
       - name: Aguardar o rollout terminar
-        run: kubectl rollout status deployment/${{ env.DEPLOYMENT }} --timeout=300s
+        run: kubectl rollout status deployment/${{ env.DEPLOYMENT }}
