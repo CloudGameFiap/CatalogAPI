@@ -1,4 +1,4 @@
-name: user-api CI/CD
+name: catalog-api CI/CD
 
 # Salvar em: .github/workflows/user-api.yml
 # Para o CatalogAPI: copie o arquivo e troque ECR_REPOSITORY, DEPLOYMENT, CONTAINER e o caminho do projeto.
@@ -13,8 +13,8 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: cloudgame/catalog-api
   EKS_CLUSTER: CloudGame-cluster
-  DEPLOYMENT: user-api      # nome do Deployment no Kubernetes
-  CONTAINER: user-api       # nome do container dentro do Deployment
+  DEPLOYMENT: catalog-api      # nome do Deployment no Kubernetes
+  CONTAINER: catalog-api       # nome do container dentro do Deployment
 
 jobs:
   # 1) Build e testes unitários (roda também em Pull Request)
