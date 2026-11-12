@@ -34,4 +34,14 @@ public sealed class GameReadOnlyRepository(IDapperContext context)
 
         return new Pagination<Game>(games, count);
     }
+
+    public async Task<IReadOnlyCollection<Game>> GetAllAsync()
+    {
+        using IDbConnection connection = Context.OpenConnection();
+
+        var games = await connection.QueryAsync<Game>(
+            "select Id, Name, Description, ImageUrl, Price, Genre, ReleaseDate, Active from Games");
+
+        return games.ToList();
+    }
 }

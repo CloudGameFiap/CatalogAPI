@@ -7,5 +7,7 @@ namespace CloudGameCatalog.Domain.Interfaces
     public interface IGameReadOnlyRepository : IReadOnlyRepository<Game, int>
     {
         Task<Pagination<Game>> FindAsync(FindGamesParameter parameters);
+
+        Task<IReadOnlyCollection<Game>> GetAllAsync();
     }
 }

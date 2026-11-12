@@ -3,6 +3,7 @@ using CloudGameCatalog.Application.Extensions;
 using CloudGameCatalog.Application.Handlers.GameHandler.Create;
 using CloudGameCatalog.Application.Handlers.GameHandler.Find;
 using CloudGameCatalog.Application.Handlers.GameHandler.GetById;
+using CloudGameCatalog.Application.Handlers.GameHandler.Search;
 using CloudGameCatalog.Application.Handlers.GameHandler.Update;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.AddGame;
 using CloudGameCatalog.Application.Handlers.UserGameHandler.GetGamesByUserId;
@@ -137,6 +138,9 @@ try
     gamesApi.MapGet("/", FindGamesAsync)
             .WithName("FindGames").AllowAnonymous();
 
+    gamesApi.MapGet("/search", SearchGamesAsync)
+            .WithName("SearchGames").AllowAnonymous();
+
     gamesApi.MapGet("/{id:int}", GetGameByIdAsync)
         .WithName("GetGameById");
 
@@ -158,6 +162,15 @@ try
         CancellationToken ct)
     {
         var result = await handler.HandleAsync(new FindGamesQuery(parameters), ct);
+
+        return result.IsSuccess ? TypedResults.Ok(result)
+            : TypedResults.NotFound();
+    }
+
+    static async Task<Results<Ok<Result<Pagination<SearchGamesQueryResponse>>>, NotFound>> SearchGamesAsync([AsParameters] SearchGamesParameter parameters, [FromServices] IHandler<SearchGamesQuery, Pagination<SearchGamesQueryResponse>> handler,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleAsync(new SearchGamesQuery(parameters), ct);
 
         return result.IsSuccess ? TypedResults.Ok(result)
             : TypedResults.NotFound();
